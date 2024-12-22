@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CaseCategoryAction;
 use App\Http\Controllers\Api\CaseSectionAction;
 use App\Http\Controllers\Api\CaseTypeAction;
 use App\Http\Controllers\Api\CaseStageAction;
+use App\Http\Controllers\Api\VisitorAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -49,5 +50,11 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [CaseStageAction::class, 'store']); 
         Route::post('update/{id}', [CaseStageAction::class, 'update']);
         Route::get('delete/{id}', [CaseStageAction::class, 'delete']);
+    });
+    Route::prefix('visitor')->group(function () {
+        Route::get('/', [VisitorAction::class, 'index']);
+        Route::post('store', [VisitorAction::class, 'store']); 
+        Route::post('update/{id}', [VisitorAction::class, 'update']);
+        Route::get('delete/{id}', [VisitorAction::class, 'delete']);
     });
 });

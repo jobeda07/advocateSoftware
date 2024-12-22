@@ -42,7 +42,7 @@ class CaseSectionAction extends Controller
             'case_category_id' => 'required|exists:case_categories,id',
         ]);
         DB::beginTransaction();
-        // try{
+        try{
             $caseSectionData=CaseSection::create([
                 'section_code'=>$request->section_code,
                 'section_details'=>$request->section_details,
@@ -53,13 +53,13 @@ class CaseSectionAction extends Controller
                 'caseSection-data'=> $caseSectionData,
                 'message' => 'Data Created successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
     public function update(Request $request,$id){
         $request->validate([
