@@ -46,30 +46,30 @@ class AuthAction extends Controller
         return response()->json(['message' => 'Invalid token'], 401);
     }
 
-    function profile_update(Request $request,$id)
-    {
-        try {
-            $validatedData = $request->validated();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->sendError('Validation Error.', $e->errors());
-        }
-        $user = Customer::find($id);
+    // function profile_update(Request $request,$id)
+    // {
+    //     try {
+    //         $validatedData = $request->validated();
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         return $this->sendError('Validation Error.', $e->errors());
+    //     }
+    //     $user = Customer::find($id);
 
         
-        if (!$user) {
-            return $this->sendError('User not found.');
-        }
-        $user->update($validatedData);
-        if ($request->hasFile('image')) {
-            $filename = $this->uploadOne($request->image, 500, 500, config('imagepath.user'));
-            $this->deleteOne(config('imagepath.user'), $user->image);
-            $user->update(['image' => $filename]);
-        }
-        if ($request->filled('password')) {
-            $user->password = bcrypt($request->input('password'));
-            $user->save();
-        } 
-        return $this->sendResponse($user, 'User updated successfully.');
-    }
+    //     if (!$user) {
+    //         return $this->sendError('User not found.');
+    //     }
+    //     $user->update($validatedData);
+    //     if ($request->hasFile('image')) {
+    //         $filename = $this->uploadOne($request->image, 500, 500, config('imagepath.user'));
+    //         $this->deleteOne(config('imagepath.user'), $user->image);
+    //         $user->update(['image' => $filename]);
+    //     }
+    //     if ($request->filled('password')) {
+    //         $user->password = bcrypt($request->input('password'));
+    //         $user->save();
+    //     } 
+    //     return $this->sendResponse($user, 'User updated successfully.');
+    // }
 
 }
