@@ -23,7 +23,7 @@ class VisitorAction extends Controller
                     'visitorId' => $item->visitorId,
                     'name' => $item->name,
                     'phone' => $item->phone ,
-                    'case_type' => $item->case_type->name ?? '',
+                    'case_type' => $item->casetype->name ?? '',
                     'priority' => $item->priority,
                     'condition' => $item->condition,
                     'created_by' => $item->created_by,
@@ -50,7 +50,7 @@ class VisitorAction extends Controller
             'condition' => 'required|in:Positive,Negative',
         ]);
         DB::beginTransaction();
-        // try{
+        try{
 
         $visitor = Visitor::orderBy('id', 'desc')->first();
         if($visitor){
@@ -75,13 +75,13 @@ class VisitorAction extends Controller
                 'visitor-data'=> $visitorData,
                 'message' => 'Data Created successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
     public function update(Request $request,$id){
         $request->validate([
@@ -92,7 +92,7 @@ class VisitorAction extends Controller
             'condition' => 'required|in:Positive,Negative',
         ]);
         DB::beginTransaction();
-        // try{
+        try{
             $visitorData=visitor::find($id);
             if(!$visitorData){
                 return response()->json([
@@ -114,13 +114,13 @@ class VisitorAction extends Controller
                 'visitor-data'=> $visitorData,
                 'message' => 'Data Update successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
 
     public function delete($id){
