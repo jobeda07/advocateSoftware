@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\CaseSectionAction;
 use App\Http\Controllers\Api\CaseTypeAction;
 use App\Http\Controllers\Api\CaseStageAction;
 use App\Http\Controllers\Api\VisitorAction;
+use App\Http\Controllers\Api\ClientTypeAction;
+use App\Http\Controllers\Api\ClientAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -56,5 +58,17 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [VisitorAction::class, 'store']); 
         Route::post('update/{id}', [VisitorAction::class, 'update']);
         Route::get('delete/{id}', [VisitorAction::class, 'delete']);
+    });
+    Route::prefix('client-type')->group(function () {
+        Route::get('/', [ClientTypeAction::class, 'index']);
+        Route::post('store', [ClientTypeAction::class, 'store']); 
+        Route::post('update/{id}', [ClientTypeAction::class, 'update']);
+        Route::get('delete/{id}', [ClientTypeAction::class, 'delete']);
+    }); 
+    Route::prefix('client')->group(function () {
+        Route::get('/', [ClientAction::class, 'index']);
+        Route::post('store', [ClientAction::class, 'store']); 
+        Route::post('update/{id}', [ClientAction::class, 'update']);
+        Route::get('delete/{id}', [ClientAction::class, 'delete']);
     });
 });
