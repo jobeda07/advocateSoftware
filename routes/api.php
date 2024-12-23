@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CaseStageAction;
 use App\Http\Controllers\Api\VisitorAction;
 use App\Http\Controllers\Api\ClientTypeAction;
 use App\Http\Controllers\Api\ClientAction;
+use App\Http\Controllers\Api\AddressAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -70,5 +71,14 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [ClientAction::class, 'store']); 
         Route::post('update/{id}', [ClientAction::class, 'update']);
         Route::get('delete/{id}', [ClientAction::class, 'delete']);
+    }); 
+    Route::prefix('division')->group(function () {
+        Route::get('/', [AddressAction::class, 'division']);
+    });
+    Route::prefix('district')->group(function () {
+        Route::get('/{id}', [AddressAction::class, 'district']);
+    });
+    Route::prefix('thana')->group(function () {
+        Route::get('/{id}', [AddressAction::class, 'thana']);
     });
 });

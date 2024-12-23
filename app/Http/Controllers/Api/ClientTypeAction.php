@@ -40,7 +40,7 @@ class ClientTypeAction extends Controller
         DB::beginTransaction();
         try{
 
-            $clientTypeData=clientType::create([
+            $clientTypeData=ClientType::create([
                 'title'=>ucfirst($request->title)
             ]);
             DB::commit();
@@ -63,7 +63,7 @@ class ClientTypeAction extends Controller
         DB::beginTransaction();
         try{
 
-            $clientTypeData=clientType::find($id);
+            $clientTypeData=ClientType::find($id);
             if(! $clientTypeData){
                 return response()->json([
                     'error' =>'data not found',
@@ -90,7 +90,7 @@ class ClientTypeAction extends Controller
     public function delete($id){
         DB::beginTransaction();
         try{
-            $clientTypeData=clientType::find($id);
+            $clientTypeData=ClientType::find($id);
             if($clientTypeData){
                 $clientTypeData->delete();
             }
