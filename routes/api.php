@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\VisitorAction;
 use App\Http\Controllers\Api\ClientTypeAction;
 use App\Http\Controllers\Api\ClientAction;
 use App\Http\Controllers\Api\AddressAction;
+use App\Http\Controllers\Api\CasesAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -81,4 +82,11 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::prefix('thana')->group(function () {
         Route::get('/{id}', [AddressAction::class, 'thana']);
     });
+    Route::prefix('cases')->group(function () {
+        Route::get('/', [CasesAction::class, 'index']);
+        Route::post('store', [CasesAction::class, 'store']); 
+        Route::post('update/{id}', [CasesAction::class, 'update']);
+        Route::get('delete/{id}', [CasesAction::class, 'delete']);
+        Route::get('delete/case-document/{id}', [CasesAction::class, 'case_document_delete']);
+    }); 
 });

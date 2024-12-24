@@ -12,7 +12,7 @@ use Exception;
 class ClientTypeAction extends Controller
 {  
     public function index(){
-        // try {
+        try {
             $clientType = ClientType::all();
             $clientTypeData = [];
 
@@ -26,12 +26,12 @@ class ClientTypeAction extends Controller
                 'clientType' =>$clientTypeData,
                  'status'=>200
             ]);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'error' =>'data not found',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
     }
     public function store(Request $request){
         $request->validate([
