@@ -14,7 +14,7 @@ class VisitorAction extends Controller
 {  
     public function index(){
         try {    
-            $visitor = Visitor::all();
+            $visitor = Visitor::orderBy('id','desc')->get();
             $visitorData = [];
 
             foreach ($visitor as $item) {

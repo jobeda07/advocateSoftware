@@ -16,8 +16,8 @@ class CasesAction extends Controller
 {  
     use ImageUpload;
     public function index(){
-        // try {
-            $case = CourtCase::all();
+        try {
+            $case = CourtCase::orderBy('id','desc')->get();
             $caseData = [];
             foreach ($case as $item) {
                 $caseData[] = [
@@ -45,12 +45,12 @@ class CasesAction extends Controller
                 'case' =>$caseData,
                  'status'=>200
             ]);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'error' =>'data not found',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
     }
     public function store(Request $request)
     {

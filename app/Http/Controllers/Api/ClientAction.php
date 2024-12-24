@@ -13,7 +13,7 @@ class ClientAction extends Controller
 {  
     public function index(){
         try {
-            $client = Client::all();
+            $client = Client::orderBy('id','desc')->get();
             $clientData = [];
 
             foreach ($client as $item) {

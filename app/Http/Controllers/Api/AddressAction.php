@@ -12,7 +12,7 @@ class AddressAction extends Controller
 {
     public function division(){
         try {
-            $division = Division::all();
+            $division = Division::orderBy('id','desc')->get();
             $divisionData = [];
 
             foreach ($division as $item) {
@@ -35,7 +35,7 @@ class AddressAction extends Controller
     }
     public function district($id){
         try {
-            $district = District::where('division_id',$id)->get();
+            $district = District::where('division_id',$id)->orderBy('id','desc')->get();
             $districtData = [];
 
             foreach ($district as $item) {
@@ -59,7 +59,7 @@ class AddressAction extends Controller
     }
     public function thana($id){
         try {
-            $thana = Thana::where('district_id',$id)->get();
+            $thana = Thana::where('district_id',$id)->orderBy('id','desc')->get();
             $thanaData = [];
 
             foreach ($thana as $item) {

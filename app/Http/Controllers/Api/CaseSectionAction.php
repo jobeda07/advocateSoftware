@@ -13,7 +13,7 @@ class CaseSectionAction extends Controller
 {  
     public function index(){
         try {
-            $caseSection = CaseSection::all();
+            $caseSection = CaseSection::orderBy('id','desc')->get();
             $caseSectionData = [];
 
             foreach ($caseSection as $item) {

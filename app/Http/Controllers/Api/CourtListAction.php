@@ -14,7 +14,7 @@ class CourtListAction extends Controller
     
     public function index(){
         try {
-            $courtList = CourtList::all();
+            $courtList = CourtList::orderBy('id','desc')->get();
             $courtListData = [];
 
             foreach ($courtList as $item) {

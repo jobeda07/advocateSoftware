@@ -13,7 +13,7 @@ class CaseTypeAction extends Controller
 {  
     public function index(){
         try {
-            $caseType = CaseType::all();
+            $caseType = CaseType::orderBy('id','desc')->get();
             $caseTypeData = [];
 
             foreach ($caseType as $item) {
