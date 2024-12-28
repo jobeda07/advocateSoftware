@@ -54,6 +54,7 @@ class CasesAction extends Controller
             'case_section' =>'required',
             'case_stage' =>'required|integer|exists:case_stages,id',
             'court' => 'required|integer|exists:court_lists,id',
+            'fees' => 'required',
             'comments' => 'required',
             'opposition_phone' => ['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
             'opposition_name' => 'required|string|max:150',
@@ -148,9 +149,10 @@ class CasesAction extends Controller
             'clientId' => 'required|integer|exists:clients,id',
             'client_type' =>'required|integer|exists:client_types,id',
             'case_type' => 'required|integer|exists:case_types,id',
-            'case_section' =>'required|integer|exists:case_sections,id',
+            'case_section' =>'required',
             'case_stage' =>'required|integer|exists:case_stages,id',
             'court' => 'required|integer|exists:court_lists,id',
+            'fees' => 'required',
             'comments' => 'required',
             'opposition_phone' => ['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
             'opposition_name' => 'required|string|max:150',
@@ -160,22 +162,33 @@ class CasesAction extends Controller
             'case_pdf.*' => 'nullable|mimes:pdf|max:2000',
         ]);
         DB::beginTransaction();
-        try{
+        // try{
             $caseData=CourtCase::find($id);
+            //dd($caseData);
             if(! $caseData){
                 return response()->json([
                     'error' =>'data not found',
                      'status'=>500
                 ]);
             }
+            if($request->witnesses){
+                $witnesses = array_map(function ($witness) {
+                    return [
+                        'name' => $witness['name'],
+                        'phone' => $witness['phone'],
+                    ];
+                }, $request->witnesses);
+            }
             $caseData->update([
-                'caseId' => $caseData->caseId,
+                'caseID' => $caseData->caseID,
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
                 'case_section' => $request->case_section,
                 'case_stage' => $request->case_stage,
+                'witnesses' => $witnesses ?? $caseData->witnesses,
                 'court' => $request->court,
+                'fees' => $request->fees,
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
                 'opposition_name' => ucfirst($request->opposition_name),
@@ -211,13 +224,13 @@ class CasesAction extends Controller
                 'case-documents' => $createdDocuments,
                 'message' => 'Data Update successfully'
             ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' =>'Somethink went wrong',
-                 'status'=>500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' =>'Somethink went wrong',
+        //          'status'=>500
+        //     ]);
+        // }
     } 
 
     public function delete($id){
