@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CourtCase;
+use App\Models\CaseSection;
 use App\Models\CaseDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,25 +21,17 @@ class CasesAction extends Controller
             $case = CourtCase::orderBy('id','desc')->get();
             $caseData = [];
             foreach ($case as $item) {
+                $caseSec=explode(',',$item->case_section);
+                $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
                 $caseData[] = [
                     'id' => $item->id,
-                    'clientId' => $item->client->name,
-                    'case_section' => $item->caseSection->section_code,
-                    'case_type' => $item->caseType->name,
-                    'case_stage' => $item->caseStage->name,
-                    'client_type' => $item->clientType->title,
+                    'clientId' => $item->client->clientId ?? '',
+                    'case_section' => $caseSections->toArray(),
+                    'case_type' => $item->caseType->name ?? '',
+                    'case_stage' => $item->caseStage->name ?? '',
+                    'client_type' => $item->clientType->title ?? '',
                     'court' => $item->courtAdd->name,
-                    'opposition_name' => $item->opposition_name,
-                    'opposition_phone' => $item->opposition_phone,
-                    'comments' => $item->comments,
-                    'case_documents' => $item->caseDocument->map(function ($doc) {
-                        return [
-                            'id' => $doc->id,
-                            'name' => $doc->name,
-                            'case_image' =>$doc->case_image ? env('APP_URL') . "/" .$doc->case_image : '',
-                            'case_pdf' => $doc->case_pdf ? env('APP_URL') . "/" .$doc->case_pdf : '',
-                        ];
-                    }),
+                    'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
             }
             return response()->json([
@@ -51,14 +44,14 @@ class CasesAction extends Controller
                  'status'=>500
             ]);
         }
-    }
+    } 
     public function store(Request $request)
     {
         $request->validate([
-            'clientId' => 'required|integer|exists:clients,id',
+            'clientId' => 'required|exists:clients,id',
             'client_type' =>'required|integer|exists:client_types,id',
             'case_type' => 'required|integer|exists:case_types,id',
-            'case_section' =>'required|integer|exists:case_sections,id',
+            'case_section' =>'required',
             'case_stage' =>'required|integer|exists:case_stages,id',
             'court' => 'required|integer|exists:court_lists,id',
             'comments' => 'required',
@@ -71,18 +64,40 @@ class CasesAction extends Controller
         ]);
     
         DB::beginTransaction();
-        try {
+        // try {
             // Create case data
+            $witnesses=[];
+            if($request->witnesses){
+            $witnesses = array_map(function ($witness) {
+                return [
+                    'name' => $witness['name'],
+                    'phone' => $witness['phone'],
+                ];
+            }, $request->witnesses);
+          }
+
+          $caseId = CourtCase::orderBy('id', 'desc')->first();
+            if ($caseId) {
+                $lastId = $caseId->id;
+                $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
+                $caseId = "VI{$id}";
+            } else {
+                $timestamp = now()->format('Ymd');
+                $caseId = "VI{$timestamp}01";
+            } 
             $caseData = CourtCase::create([
+                'caseId' => $caseId,
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
-                'case_section' => $request->case_section,
+                'case_section' =>$request->case_section,
                 'case_stage' => $request->case_stage,
                 'court' => $request->court,
+                'fees' => $request->fees,
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
                 'opposition_name' => ucfirst($request->opposition_name),
+                'witnesses' => json_encode($witnesses),
             ]);
     
             $createdDocuments = [];
@@ -119,13 +134,13 @@ class CasesAction extends Controller
                 'message' => 'Data Created successfully'
             ]);
             
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' => 'Something went wrong',
-                'status' => 500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' => 'Something went wrong',
+        //         'status' => 500
+        //     ]);
+        // }
     }
     
     public function update(Request $request,$id){
@@ -154,6 +169,7 @@ class CasesAction extends Controller
                 ]);
             }
             $caseData->update([
+                'caseId' => $caseData->caseId,
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
@@ -258,6 +274,51 @@ class CasesAction extends Controller
             DB::rollback();
             return response()->json([
                 'error' =>'Somethink Went Wrong',
+                 'status'=>500
+            ]);
+        }
+    }
+
+    public function show($id){
+        try {
+            $case = CourtCase::find($id);
+            $caseSec=explode(',',$case->case_section);
+            $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+            $caseData[] = [
+                'id' => $case->id,
+                'clientId' => $case->client->clientId,
+                'client_name' => $case->client->name,
+                'client_phone' => $case->client->phone,
+                'fathers_name' => $case->client->fathers_name,
+                'case_section' => $caseSections->toArray(),
+                'case_type' => $case->caseType->name,
+                'case_stage' => $case->caseStage->name,
+                'client_type' => $case->clientType->title,
+                'fees' => $case->fees ?? '',
+                'court' => $case->courtAdd->name,
+                'opposition_name' => $case->opposition_name,
+                'opposition_phone' => $case->opposition_phone,
+                'branch' => $case->branch,
+                'comments' => $case->comments,
+                'witnesses' =>  json_decode($case->witnesses),
+                'case_documents' => $case->caseDocument->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'name' => $doc->name,
+                        'case_image' =>$doc->case_image ? env('APP_URL') . "/" .$doc->case_image : '',
+                        'case_pdf' => $doc->case_pdf ? env('APP_URL') . "/" .$doc->case_pdf : '',
+                    ];
+                }),
+                'create_date_time' => $case->created_at->format('j F Y  g.i A'),
+            ];
+            
+            return response()->json([
+                'case' =>$caseData,
+                 'status'=>200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
                  'status'=>500
             ]);
         }

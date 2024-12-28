@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ClientTypeAction;
 use App\Http\Controllers\Api\ClientAction;
 use App\Http\Controllers\Api\AddressAction;
 use App\Http\Controllers\Api\CasesAction;
+use App\Http\Controllers\Api\EmployeeAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -87,6 +88,13 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [CasesAction::class, 'store']); 
         Route::post('update/{id}', [CasesAction::class, 'update']);
         Route::get('delete/{id}', [CasesAction::class, 'delete']);
+        Route::get('show/{id}', [CasesAction::class, 'show']);
         Route::get('delete/case-document/{id}', [CasesAction::class, 'case_document_delete']);
+    }); 
+    Route::prefix('employee')->group(function () {
+        Route::get('/', [EmployeeAction::class, 'index']);
+        Route::post('store', [EmployeeAction::class, 'store']); 
+        Route::post('update/{id}', [EmployeeAction::class, 'update']);
+        Route::get('delete/{id}', [EmployeeAction::class, 'delete']);
     }); 
 });

@@ -19,16 +19,20 @@ class ClientAction extends Controller
             foreach ($client as $item) {
                 $clientData[] = [
                     'id' => $item->id,
-                    'name' => $item->name,
-                    'phone' => $item->phone,
+                    'clientId' => $item->clientId ?? '',
+                    'name' => $item->name ?? '',
+                    'phone' => $item->phone ?? '',
                     'email' => $item->email ?? '',
-                    'fathers_name' => $item->fathers_name,
-                    'alternative_phone' => $item->alternative_phone,
-                    'profession' => $item->profession,
-                    'division_id' => $item->division_id,
-                    'district_id' => $item->district_id,
-                    'thana_id' => $item->thana_id,
-                    'address' => $item->address,
+                    'fathers_name' => $item->fathers_name ?? '',
+                    'alternative_phone' => $item->alternative_phone ?? '',
+                    'profession' => $item->profession ?? '',
+                    'division_id' => $item->division_id?? '',
+                    'district_id' => $item->district_id ?? '',
+                    'thana_id' => $item->thana_id ?? '',
+                    'address' => $item->address ?? '',
+                    'reference' => $item->reference ?? '',
+                    'created_by' => $item->createdBy->name ?? '',
+                    'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
             }
             return response()->json([
@@ -54,6 +58,7 @@ class ClientAction extends Controller
             'district_id' => 'required|exists:districts,id',
             'thana_id' => 'required|exists:thanas,id',
             'address' => 'required|string|max:180',
+            'reference' => 'required|string|max:500',
         ]);
         DB::beginTransaction();
         try{
@@ -61,10 +66,10 @@ class ClientAction extends Controller
             if($client){
                 $lastId = $client->id;
                 $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-                $clientId = $id;
+                $clientId ="CL$id";
             }else{
                 $timestamp = now()->format('Ymd');
-                $clientId = "{$timestamp}01";
+                $clientId = "CL{$timestamp}01";
             }
 
             $clientData=Client::create([
@@ -79,6 +84,8 @@ class ClientAction extends Controller
                 'district_id' => $request->district_id,
                 'thana_id' => $request->thana_id,
                 'address' => $request->address,
+                'reference' => $request->reference,
+                'created_by'=>auth()->user()->id,
             ]);
             DB::commit();
             return response([
@@ -105,6 +112,7 @@ class ClientAction extends Controller
             'district_id' => 'required',
             'thana_id' => 'required',
             'address' => 'required|string|max:180',
+            'reference' => 'required|string|max:500',
         ]);
         DB::beginTransaction();
         try{
@@ -128,6 +136,8 @@ class ClientAction extends Controller
                 'district_id' => $request->district_id,
                 'thana_id' => $request->thana_id,
                 'address' => $request->address,
+                'reference' => $request->reference,
+                'created_by'=>$clientData->created_by,
             ]);
             DB::commit();
             return response([

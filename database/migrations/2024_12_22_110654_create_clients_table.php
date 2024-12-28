@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('clientId');
+            $table->string('caseID');
+            $table->string('clientId');
             $table->string('name');
             $table->string('phone');
             $table->string('email')->nullable();
@@ -24,6 +25,8 @@ return new class extends Migration
             $table->string('district_id');
             $table->string('thana_id');
             $table->string('address');
+            $table->text('reference')->nullable();
+            $table->bigInteger('created_by');
             $table->timestamps();
         });
     }

@@ -21,13 +21,15 @@ class VisitorAction extends Controller
                 $visitorData[] = [
                     //'id' => $item->id,
                     'visitorId' => $item->visitorId,
-                    'name' => $item->name,
-                    'phone' => $item->phone ,
+                    'name' => $item->name ?? '',
+                    'phone' => $item->phone ?? '',
                     'case_type' => $item->casetype->name ?? '',
                     'priority' => $item->priority,
-                    'condition' => $item->condition,
-                    'created_by' => $item->created_by,
-                    'date_time' => $item->created_at->format('j F Y  g.i A'),
+                    'fees'=>$item->fees ?? '',
+                    'reference'=>$item->reference ?? '',
+                    'remark'=>$item->remark ?? '',
+                    'created_by' => $item->createdBy->name ?? '',
+                    'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
             }
             return response()->json([
@@ -47,27 +49,31 @@ class VisitorAction extends Controller
             'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
             'case_type' => 'required|exists:case_types,id',
             'priority' => 'required|in:Low,Medium,High',
-            'condition' => 'required|in:Positive,Negative',
+            'fees' => 'required|integer',
+            'reference' => 'nullable|max:500',
+            'remark' => 'nullable',
         ]);
         DB::beginTransaction();
-        try{
+        // try{
 
         $visitor = Visitor::orderBy('id', 'desc')->first();
-        if($visitor){
+        if ($visitor) {
             $lastId = $visitor->id;
             $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-            $visitorId = $id;
-        }else{
+            $visitorId = "VI{$id}";
+        } else {
             $timestamp = now()->format('Ymd');
-            $visitorId = "{$timestamp}01";
-        }
+            $visitorId = "VI{$timestamp}01";
+        }        
             $visitorData=Visitor::create([
                 'visitorId'=>$visitorId,
                 'name'=>$request->name,
                 'phone'=>$request->phone,
                 'case_type'=>$request->case_type,
                 'priority'=>$request->priority,
-                'condition'=>$request->condition,
+                'fees'=>$request->fees,
+                'reference'=>$request->reference,
+                'remark'=>$request->remark,
                 'created_by'=>auth()->user()->id,
             ]);
             DB::commit();
@@ -75,13 +81,13 @@ class VisitorAction extends Controller
                 'visitor-data'=> $visitorData,
                 'message' => 'Data Created successfully'
             ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' =>'Somethink went wrong',
-                 'status'=>500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' =>'Somethink went wrong',
+        //          'status'=>500
+        //     ]);
+        // }
     } 
     public function update(Request $request,$id){
         $request->validate([
@@ -89,7 +95,9 @@ class VisitorAction extends Controller
             'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
             'case_type' => 'required|exists:case_types,id',
             'priority' => 'required|in:Low,Medium,High',
-            'condition' => 'required|in:Positive,Negative',
+            'fees' => 'required|integer',
+            'reference' => 'nullable|max:500',
+            'remark' => 'nullable',
         ]);
         DB::beginTransaction();
         try{
@@ -106,7 +114,9 @@ class VisitorAction extends Controller
                 'phone'=>$request->phone,
                 'case_type'=>$request->case_type,
                 'priority'=>$request->priority,
-                'condition'=>$request->condition,
+                'fees'=>$request->fees,
+                'reference'=>$request->reference,
+                'remark'=>$request->remark,
                 'created_by'=>$visitorData->created_by,
             ]);
             DB::commit();

@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('visitors', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('visitorId');
+            $table->string('visitorId');
             $table->string('name');
             $table->string('phone');
             $table->string('case_type');
+            $table->double('fees');
+            $table->text('reference')->nullable();
+            $table->longtext('remark')->nullable();
             $table->enum('priority', ['High','Medium','Low']);
-            $table->enum('condition', ['Positive','Negative']);
-            $table->string('created_by');
+            $table->bigInteger('created_by');
             $table->timestamps();
         });
     }

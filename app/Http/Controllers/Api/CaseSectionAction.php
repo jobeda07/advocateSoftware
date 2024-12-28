@@ -21,7 +21,7 @@ class CaseSectionAction extends Controller
                     'id' => $item->id,
                     'section_code' => $item->section_code,
                     'section_details' => $item->section_details ,
-                    'case_category_id' => $item->case_category->name ?? 'N/A',
+                    'case_category' => $item->case_category->name ?? 'N/A',
                 ];
             }
             return response()->json([

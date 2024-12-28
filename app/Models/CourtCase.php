@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class CourtCase extends Model
 {
     protected $guarded=[];
+    protected $casts = [
+        'witnesses' => 'array',
+    ];
     public function client(){
         return $this->belongsTo(Client::class,'clientId');
     } 
@@ -19,6 +22,7 @@ class CourtCase extends Model
     public function caseSection(){
         return $this->belongsTo(CaseSection::class,'case_section');
     }
+
     public function caseStage(){
         return $this->belongsTo(CaseStage::class,'case_stage');
     }

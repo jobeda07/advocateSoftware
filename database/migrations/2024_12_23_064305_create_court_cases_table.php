@@ -13,14 +13,20 @@ return new class extends Migration
     {
         Schema::create('court_cases', function (Blueprint $table) {
             $table->id();  
-            $table->bigInteger('clientId');
+            $table->string('caseId');
+            $table->string('clientId');
             $table->bigInteger('client_type');
             $table->bigInteger('case_type');
-            $table->bigInteger('case_section');
+            $table->string('case_section');
             $table->bigInteger('case_stage');
             $table->bigInteger('court');
+            $table->double('fees');
+            $table->string('branch')->nullable();
+            $table->json('witnesses')->nullable();
             $table->string('opposition_name')->nullable();
             $table->string('opposition_phone')->nullable();
+            $table->enum('priority', ['High','Medium','Low']);
+            $table->enum('status', ['active','inactive']);
             $table->longtext('comments');
             $table->timestamps();
         });
