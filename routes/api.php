@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [ClientAction::class, 'store']); 
         Route::post('update/{id}', [ClientAction::class, 'update']);
         Route::get('delete/{id}', [ClientAction::class, 'delete']);
+        Route::get('show/{id}', [ClientAction::class, 'show']);
     }); 
     Route::prefix('division')->group(function () {
         Route::get('/', [AddressAction::class, 'division']);

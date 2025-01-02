@@ -170,7 +170,7 @@
                         Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
                     </footer>
                 </div>
-            </div>
+            </div> 
         </div>
     </body>
 </html>

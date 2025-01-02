@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Client;
+use App\Models\CourtCase;
+use App\Models\CaseSection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -171,5 +173,60 @@ class ClientAction extends Controller
                  'status'=>500
             ]);
         }
+    }
+    public function show($id){
+       // try{
+            $clientData=Client::find($id);
+            if(!$clientData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
+            $clientDataShow[] = [
+                'id' => $clientData->id,
+                'clientId' => $clientData->clientId ?? '',
+                'name' => $clientData->name ?? '',
+                'phone' => $clientData->phone ?? '',
+                'email' => $clientData->email ?? '',
+                'fathers_name' => $clientData->fathers_name ?? '',
+                'alternative_phone' => $clientData->alternative_phone ?? '',
+                'profession' => $clientData->profession ?? '',
+                'division_id' => $clientData->division_id?? '',
+                'district_id' => $clientData->district_id ?? '',
+                'thana_id' => $clientData->thana_id ?? '',
+                'address' => $clientData->address ?? '',
+                'reference' => $clientData->reference ?? '',
+                'created_by' => $clientData->createdBy->name ?? '',
+                'create_date_time' => $clientData->created_at->format('j F Y  g.i A'),
+            ];
+            $cases = CourtCase::where('clientId',$clientData->id)->orderBy('id','desc')->get();
+            $caseData = [];
+            foreach ($cases as $case){
+                $caseSec=explode(',',$case->case_section);
+                $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+                $caseData[] = [
+                    'id' => $case->id,
+                    'caseID' => $case->caseID,
+                    'case_section' => $caseSections->toArray(),
+                    'case_type' => $case->caseType->name,
+                    'case_stage' => $case->caseStage->name,
+                    'fees' => $case->fees ?? '',
+                    'court' => $case->courtAdd->name,
+                    'create_date_time' => $case->created_at->format('j F Y  g.i A'),
+                ];
+            }
+           
+            return response()->json([
+                'client' =>$clientData,
+                'case_Data' =>$caseData,
+                 'status'=>200
+            ]);
+        // }catch (\Exception $e) {
+        //     return response()->json([
+        //         'error' =>'Somethink Went Wrong',
+        //          'status'=>500
+        //     ]);
+        // }
     }
 }

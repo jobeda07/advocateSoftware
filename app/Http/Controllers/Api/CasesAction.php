@@ -65,7 +65,7 @@ class CasesAction extends Controller
         ]);
     
         DB::beginTransaction();
-        // try {
+        try {
             // Create case data
             $witnesses=[];
             if($request->witnesses){
@@ -98,7 +98,7 @@ class CasesAction extends Controller
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
                 'opposition_name' => ucfirst($request->opposition_name),
-                'witnesses' => json_encode($witnesses),
+                'witnesses' => $witnesses,
             ]);
     
             $createdDocuments = [];
@@ -135,13 +135,13 @@ class CasesAction extends Controller
                 'message' => 'Data Created successfully'
             ]);
             
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' => 'Something went wrong',
-        //         'status' => 500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' => 'Something went wrong',
+                'status' => 500
+            ]);
+        }
     }
     
     public function update(Request $request,$id){
@@ -162,7 +162,7 @@ class CasesAction extends Controller
             'case_pdf.*' => 'nullable|mimes:pdf|max:2000',
         ]);
         DB::beginTransaction();
-        // try{
+        try{
             $caseData=CourtCase::find($id);
             //dd($caseData);
             if(! $caseData){
@@ -186,7 +186,7 @@ class CasesAction extends Controller
                 'case_type' => $request->case_type,
                 'case_section' => $request->case_section,
                 'case_stage' => $request->case_stage,
-                'witnesses' => $witnesses ?? $caseData->witnesses,
+                'witnesses' => $witnesses?? $caseData->witnesses,
                 'court' => $request->court,
                 'fees' => $request->fees,
                 'comments' => $request->comments,
@@ -224,13 +224,13 @@ class CasesAction extends Controller
                 'case-documents' => $createdDocuments,
                 'message' => 'Data Update successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
 
     public function delete($id){
@@ -299,6 +299,7 @@ class CasesAction extends Controller
             $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
             $caseData[] = [
                 'id' => $case->id,
+                'caseID' => $case->caseID,
                 'clientId' => $case->client->clientId,
                 'client_name' => $case->client->name,
                 'client_phone' => $case->client->phone,
@@ -313,7 +314,7 @@ class CasesAction extends Controller
                 'opposition_phone' => $case->opposition_phone,
                 'branch' => $case->branch,
                 'comments' => $case->comments,
-                'witnesses' =>  json_decode($case->witnesses),
+                'witnesses' =>$case->witnesses,
                 'case_documents' => $case->caseDocument->map(function ($doc) {
                     return [
                         'id' => $doc->id,
