@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ClientAction;
 use App\Http\Controllers\Api\AddressAction;
 use App\Http\Controllers\Api\CasesAction;
 use App\Http\Controllers\Api\EmployeeAction;
+use App\Http\Controllers\Api\HearingAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -97,5 +98,12 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [EmployeeAction::class, 'store']); 
         Route::post('update/{id}', [EmployeeAction::class, 'update']);
         Route::get('delete/{id}', [EmployeeAction::class, 'delete']);
+    }); 
+
+    Route::prefix('hearing')->group(function () {
+        Route::get('/', [HearingAction::class, 'index']);
+        Route::post('store', [HearingAction::class, 'store']); 
+        Route::post('update/{id}', [HearingAction::class, 'update']);
+        Route::get('delete/{id}', [HearingAction::class, 'delete']);
     }); 
 });

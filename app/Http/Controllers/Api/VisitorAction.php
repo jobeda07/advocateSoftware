@@ -19,7 +19,7 @@ class VisitorAction extends Controller
 
             foreach ($visitor as $item) {
                 $visitorData[] = [
-                    //'id' => $item->id,
+                    'id' => $item->id,
                     'visitorId' => $item->visitorId,
                     'name' => $item->name ?? '',
                     'phone' => $item->phone ?? '',

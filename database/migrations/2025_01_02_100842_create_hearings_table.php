@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('hearings', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('case_id');
+            $table->bigInteger('court_id');
+            $table->dateTime('date_time');
+            $table->longText('comment')->nullable();
+            $table->bigInteger('created_by');
             $table->timestamps();
         });
     }
