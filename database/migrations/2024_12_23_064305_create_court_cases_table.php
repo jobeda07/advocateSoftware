@@ -17,9 +17,11 @@ return new class extends Migration
             $table->string('clientId');
             $table->bigInteger('client_type');
             $table->bigInteger('case_type');
+            $table->bigInteger('case_category');
             $table->string('case_section');
             $table->bigInteger('case_stage');
             $table->bigInteger('court');
+            $table->string('court_branch')->nullable();
             $table->double('fees');
             $table->string('branch')->nullable();
             $table->json('witnesses')->nullable();

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Exception;
 use App\Traits\ImageUpload;
+use App\Http\Resources\CourtCaseResource;
 
 class CasesAction extends Controller
 {  
@@ -45,24 +46,9 @@ class CasesAction extends Controller
             ]);
         }
     } 
-    public function store(Request $request)
+    public function store(CourtCaseRequest $request)
     {
-        $request->validate([
-            'clientId' => 'required|exists:clients,id',
-            'client_type' =>'required|integer|exists:client_types,id',
-            'case_type' => 'required|integer|exists:case_types,id',
-            'case_section' =>'required',
-            'case_stage' =>'required|integer|exists:case_stages,id',
-            'court' => 'required|integer|exists:court_lists,id',
-            'fees' => 'required',
-            'comments' => 'required',
-            'opposition_phone' => ['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'opposition_name' => 'required|string|max:150',
-            'case_doc_name' => 'nullable|array',
-            'case_doc_name.*' => 'nullable|string',
-            'case_image.*.image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'case_pdf.*' => 'nullable|mimes:pdf|max:2000',
-        ]);
+       
     
         DB::beginTransaction();
         try {
@@ -91,9 +77,11 @@ class CasesAction extends Controller
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
+                'case_category' => $request->case_category,
                 'case_section' =>$request->case_section,
                 'case_stage' => $request->case_stage,
                 'court' => $request->court,
+                'court_branch' => $request->court_branch,
                 'fees' => $request->fees,
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
@@ -130,8 +118,7 @@ class CasesAction extends Controller
             DB::commit();
             
             return response([
-                'case-data' => $caseData,
-                'case-documents' => $createdDocuments,
+                'case-data' => new CourtCaseResource($caseData),
                 'message' => 'Data Created successfully'
             ]);
             
@@ -144,23 +131,8 @@ class CasesAction extends Controller
         }
     }
     
-    public function update(Request $request,$id){
-        $request->validate([
-            'clientId' => 'required|integer|exists:clients,id',
-            'client_type' =>'required|integer|exists:client_types,id',
-            'case_type' => 'required|integer|exists:case_types,id',
-            'case_section' =>'required',
-            'case_stage' =>'required|integer|exists:case_stages,id',
-            'court' => 'required|integer|exists:court_lists,id',
-            'fees' => 'required',
-            'comments' => 'required',
-            'opposition_phone' => ['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'opposition_name' => 'required|string|max:150',
-            'case_doc_name' => 'nullable|array',
-            'case_doc_name.*' => 'nullable|string',
-            'case_image.*.image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'case_pdf.*' => 'nullable|mimes:pdf|max:2000',
-        ]);
+    public function update(CourtCaseRequest $request,$id){
+        
         DB::beginTransaction();
         try{
             $caseData=CourtCase::find($id);
@@ -184,6 +156,7 @@ class CasesAction extends Controller
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
+                'case_category' => $request->case_category,
                 'case_section' => $request->case_section,
                 'case_stage' => $request->case_stage,
                 'witnesses' => $witnesses?? $caseData->witnesses,
@@ -220,8 +193,7 @@ class CasesAction extends Controller
             }
             DB::commit();
             return response([
-                'case-data'=> $caseData,
-                'case-documents' => $createdDocuments,
+                'case-data' => new CourtCaseResource($caseData),
                 'message' => 'Data Update successfully'
             ]);
         } catch (\Exception $e) {
@@ -295,39 +267,10 @@ class CasesAction extends Controller
     public function show($id){
         try {
             $case = CourtCase::find($id);
-            $caseSec=explode(',',$case->case_section);
-            $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
-            $caseData[] = [
-                'id' => $case->id,
-                'caseID' => $case->caseID,
-                'clientId' => $case->client->clientId,
-                'client_name' => $case->client->name,
-                'client_phone' => $case->client->phone,
-                'fathers_name' => $case->client->fathers_name,
-                'case_section' => $caseSections->toArray(),
-                'case_type' => $case->caseType->name,
-                'case_stage' => $case->caseStage->name,
-                'client_type' => $case->clientType->title,
-                'fees' => $case->fees ?? '',
-                'court' => $case->courtAdd->name,
-                'opposition_name' => $case->opposition_name,
-                'opposition_phone' => $case->opposition_phone,
-                'branch' => $case->branch,
-                'comments' => $case->comments,
-                'witnesses' =>$case->witnesses,
-                'case_documents' => $case->caseDocument->map(function ($doc) {
-                    return [
-                        'id' => $doc->id,
-                        'name' => $doc->name,
-                        'case_image' =>$doc->case_image ? env('APP_URL') . "/" .$doc->case_image : '',
-                        'case_pdf' => $doc->case_pdf ? env('APP_URL') . "/" .$doc->case_pdf : '',
-                    ];
-                }),
-                'create_date_time' => $case->created_at->format('j F Y  g.i A'),
-            ];
+            $caseData =new CourtCaseResource($case);
             
             return response()->json([
-                'case' =>$caseData,
+                 'case' =>$caseData,
                  'status'=>200
             ]);
         } catch (\Exception $e) {

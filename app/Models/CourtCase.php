@@ -31,5 +31,8 @@ class CourtCase extends Model
     }
     public function caseDocument(){
         return $this->hasMany(CaseDocument::class,'courtCase_id');
+    } 
+    public function caseCategory(){
+        return $this->belongsTo(CaseCategory::class,'case_category');
     }
 }
