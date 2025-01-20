@@ -93,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('delete/{id}', [CasesAction::class, 'delete']);
         Route::get('show/{id}', [CasesAction::class, 'show']);
         Route::get('delete/case-document/{id}', [CasesAction::class, 'case_document_delete']);
+        Route::post('lower/store/{id}', [CasesAction::class, 'case_lower_store']);
     }); 
     Route::prefix('employee')->group(function () {
         Route::get('/', [EmployeeAction::class, 'index']);

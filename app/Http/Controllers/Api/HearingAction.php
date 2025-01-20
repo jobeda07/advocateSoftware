@@ -31,9 +31,9 @@ class HearingAction extends Controller
     {   
 
         DB::beginTransaction();
-        try {         
+        // try {         
             $hearingData = Hearing::create([
-                'case_id' => $request->case_id,
+                'caseId' => $request->caseId,
                 'court_id' => $request->court_id,
                 'date_time' => $request->date_time,
                 'comment' => $request->comment,
@@ -47,13 +47,13 @@ class HearingAction extends Controller
                 'message' => 'Data Created successfully'
             ]);
             
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' => 'Something went wrong',
-                'status' => 500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' => 'Something went wrong',
+        //         'status' => 500
+        //     ]);
+        // }
     }
     
     public function update(HearingRequest $request,$id){
@@ -69,7 +69,7 @@ class HearingAction extends Controller
                 ]);
             }
             $hearingData->update([
-                'case_id' => $request->case_id,
+                'caseId' => $request->caseId,
                 'court_id' => $request->court_id,
                 'date_time' => $request->date_time,
                 'comment' => $request->comment,

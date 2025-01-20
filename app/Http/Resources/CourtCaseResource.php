@@ -20,10 +20,10 @@ class CourtCaseResource extends JsonResource
         return [
             'id' => $this->id,
             'caseID' => $this->caseID,
-            'clientId' => $this->client->clientId ?? 'N/A',
-            'client_name' => $this->client->name ?? 'N/A',
-            'client_phone' => $this->client->phone ?? 'N/A',
-            'fathers_name' => $this->client->fathers_name ?? 'N/A',
+            'clientId' => $this->clientId ?? 'N/A',
+            'client_name' => $this->clientAdd->name ?? 'N/A',
+            'client_phone' => $this->clientAdd->phone ?? 'N/A',
+            'fathers_name' => $this->clientAdd->fathers_name ?? 'N/A',
             'case_section' => $caseSections->toArray(),
             'case_type' => $this->caseType->name ?? 'N/A',
             'case_category' => $this->caseCategory->name ?? 'N/A',
@@ -37,6 +37,8 @@ class CourtCaseResource extends JsonResource
             'branch' => $this->branch ?? 'N/A',
             'comments' => $this->comments ?? 'N/A',
             'witnesses' =>$this->witnesses ?? 'N/A',
+            'created_by' =>$this->createdBy->name ?? 'N/A',
+            'case_lower' => $this->caseLower->name ?? 'N/A',
             'case_documents' => $this->caseDocument->map(function ($doc) {
                 return [
                     'id' => $doc->id,

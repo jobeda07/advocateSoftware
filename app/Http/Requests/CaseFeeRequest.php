@@ -22,7 +22,7 @@ class CaseFeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'case_id' => 'required|exists:court_cases,id',
+           'caseId' => 'required|exists:court_cases,caseId',
             'amount' =>'required|integer',
             'payment_type' =>'required',
         ];

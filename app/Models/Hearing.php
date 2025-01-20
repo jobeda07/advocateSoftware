@@ -12,7 +12,7 @@ class Hearing extends Model
         return $this->belongsTo(User::class,'created_by');
     }
     public function caseOf(){
-        return $this->belongsTo(CourtCase::class,'case_id');
+        return $this->belongsTo(CourtCase::class,'caseId','caseId');
     }
     public function courtOf(){
         return $this->belongsTo(CourtList::class,'court_id');

@@ -43,7 +43,7 @@ class CaseFeeAction extends Controller
 
             $caseFeeData = CaseFee::create([
                 'transaction_no' => $feeId,
-                'case_id' => $request->case_id,
+                'caseId' => $request->caseId,
                 'amount' => $request->amount,
                 'payment_type' => $request->payment_type,
                 'comment' => $request->comment,
@@ -80,7 +80,7 @@ class CaseFeeAction extends Controller
             }
             $caseFeeData->update([
                 'transaction_no' => $caseFeeData->transaction_no,
-                'case_id' => $request->case_id,
+                'caseId' => $request->caseId,
                 'amount' => $request->amount,
                 'payment_type' => $request->payment_type,
                 'comment' => $request->comment,

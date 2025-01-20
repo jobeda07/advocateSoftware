@@ -22,13 +22,13 @@ class CourtCaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'clientId' => 'required|exists:clients,id',
+            'clientId' => 'required|exists:clients,clientId',
             'client_type' =>'required|integer|exists:client_types,id',
             'case_type' => 'required|integer|exists:case_types,id',
             'case_category' => 'required|integer|exists:case_categories,id',
             'case_section' =>'required',
             'case_stage' =>'required|integer|exists:case_stages,id',
-            'court' => 'required|integer|exists:court_lists,id',
+            'court_id' => 'required|integer|exists:court_lists,id',
             'fees' => 'required',
             'comments' => 'required',
             'opposition_phone' => ['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],

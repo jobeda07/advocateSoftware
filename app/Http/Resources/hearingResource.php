@@ -16,9 +16,9 @@ class hearingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'case_id' => $this->caseOf->caseID ?? '',
-            'client_name' => $this->caseOf->client->name ?? '',
-            'client_phone' => $this->caseOf->client->phone ?? '',
+            'caseId' => $this->caseId ?? '',
+            'client_name' => $this->caseOf->clientAdd->name ?? '',
+            'client_phone' => $this->caseOf->clientAdd->phone ?? '',
             'court_name' => $this->courtOf->name ?? '',
             'date_time' => $this->date_time ?? '',
             'comment' => $this->comment ?? '',

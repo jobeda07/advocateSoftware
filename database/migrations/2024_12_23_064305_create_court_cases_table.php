@@ -20,7 +20,7 @@ return new class extends Migration
             $table->bigInteger('case_category');
             $table->string('case_section');
             $table->bigInteger('case_stage');
-            $table->bigInteger('court');
+            $table->bigInteger('court_id');
             $table->string('court_branch')->nullable();
             $table->double('fees');
             $table->string('branch')->nullable();
@@ -29,7 +29,9 @@ return new class extends Migration
             $table->string('opposition_phone')->nullable();
             $table->enum('priority', ['High','Medium','Low']);
             $table->enum('status', ['active','inactive']);
+            $table->bigInteger('case_lower_id')->nullable();
             $table->longtext('comments');
+            $table->bigInteger('created_by');
             $table->timestamps();
         });
     }

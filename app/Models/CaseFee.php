@@ -12,6 +12,6 @@ class CaseFee extends Model
         return $this->belongsTo(User::class,'created_by');
     }
     public function caseOf(){
-        return $this->belongsTo(CourtCase::class,'case_id');
+        return $this->belongsTo(CourtCase::class,'caseId');
     }
 }

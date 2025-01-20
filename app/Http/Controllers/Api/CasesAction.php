@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Exception;
+use Auth;
+use App\Http\Requests\CourtCaseRequest;
 use App\Traits\ImageUpload;
 use App\Http\Resources\CourtCaseResource;
 
@@ -18,7 +20,7 @@ class CasesAction extends Controller
 {  
     use ImageUpload;
     public function index(){
-        try {
+       // try {
             $case = CourtCase::orderBy('id','desc')->get();
             $caseData = [];
             foreach ($case as $item) {
@@ -26,12 +28,14 @@ class CasesAction extends Controller
                 $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
                 $caseData[] = [
                     'id' => $item->id,
-                    'clientId' => $item->client->clientId ?? '',
+                    'caseId' => $item->caseId,
+                    'clientId' => $item->clientId ?? '',
                     'case_section' => $caseSections->toArray(),
                     'case_type' => $item->caseType->name ?? '',
                     'case_stage' => $item->caseStage->name ?? '',
                     'client_type' => $item->clientType->title ?? '',
-                    'court' => $item->courtAdd->name,
+                    'court' => $item->courtAdd->name ?? '',
+                    'case_lower' => $item->caseLower->name ?? '',
                     'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
             }
@@ -39,12 +43,12 @@ class CasesAction extends Controller
                 'case' =>$caseData,
                  'status'=>200
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' =>'data not found',
-                 'status'=>500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'error' =>'data not found',
+        //          'status'=>500
+        //     ]);
+        // }
     } 
     public function store(CourtCaseRequest $request)
     {
@@ -67,10 +71,10 @@ class CasesAction extends Controller
             if ($caseId) {
                 $lastId = $caseId->id;
                 $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-                $caseId = "VI{$id}";
+                $caseId = "CA{$id}";
             } else {
                 $timestamp = now()->format('Ymd');
-                $caseId = "VI{$timestamp}01";
+                $caseId = "CA{$timestamp}01";
             } 
             $caseData = CourtCase::create([
                 'caseId' => $caseId,
@@ -80,13 +84,14 @@ class CasesAction extends Controller
                 'case_category' => $request->case_category,
                 'case_section' =>$request->case_section,
                 'case_stage' => $request->case_stage,
-                'court' => $request->court,
+                'court_id' => $request->court_id,
                 'court_branch' => $request->court_branch,
                 'fees' => $request->fees,
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
                 'opposition_name' => ucfirst($request->opposition_name),
                 'witnesses' => $witnesses,
+                'created_by'=>Auth::user()->id
             ]);
     
             $createdDocuments = [];
@@ -160,7 +165,7 @@ class CasesAction extends Controller
                 'case_section' => $request->case_section,
                 'case_stage' => $request->case_stage,
                 'witnesses' => $witnesses?? $caseData->witnesses,
-                'court' => $request->court,
+                'court_id' => $request->court_id,
                 'fees' => $request->fees,
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
@@ -276,6 +281,30 @@ class CasesAction extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
+    }
+
+    public function case_lower_store(Request $request,$id){
+        DB::beginTransaction();
+        $request->validate([
+            'case_lower_id' => 'required|exists:users,id',
+        ]);
+        try{
+            $case=CourtCase::find($id);
+            if($case){
+                $case->case_lower_id=$request->case_lower_id;
+                $case->save();
+            }
+            DB::commit();
+            return response([
+                'message' => ' Added Successfully'
+            ]);
+        }catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink Went Wrong',
                  'status'=>500
             ]);
         }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('case_fees', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_no');
-            $table->bigInteger('case_id');
+            $table->string('caseId');
             $table->bigInteger('created_by');
             $table->double('amount');
             $table->string('payment_type');

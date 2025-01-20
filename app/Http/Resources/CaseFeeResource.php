@@ -17,7 +17,7 @@ class CaseFeeResource extends JsonResource
         return [
             'id' => $this->id,
             'transaction_no' => $this->transaction_no,
-            'case_id' => $this->caseOf->caseID ?? '',
+            'caseId' => $this->caseOf->caseID ?? '',
             'client_name' => $this->caseOf->client->name ?? '',
             'client_phone' => $this->caseOf->client->phone ?? '',
             'amount' => $this->amount ?? '',
