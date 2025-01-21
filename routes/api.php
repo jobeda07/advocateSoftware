@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\CasesAction;
 use App\Http\Controllers\Api\EmployeeAction;
 use App\Http\Controllers\Api\HearingAction;
 use App\Http\Controllers\Api\CaseFeeAction;
+use App\Http\Controllers\Api\CaseExtraFeeAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -114,5 +115,11 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [CaseFeeAction::class, 'store']); 
         Route::post('update/{id}', [CaseFeeAction::class, 'update']);
         Route::get('delete/{id}', [CaseFeeAction::class, 'delete']);
+    }); 
+    Route::prefix('extra-case-fees')->group(function () {
+        Route::get('/', [CaseExtraFeeAction::class, 'index']);
+        Route::post('store', [CaseExtraFeeAction::class, 'store']); 
+        Route::post('update/{id}', [CaseExtraFeeAction::class, 'update']);
+        Route::get('delete/{id}', [CaseExtraFeeAction::class, 'delete']);
     }); 
 });
