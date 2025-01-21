@@ -25,6 +25,7 @@ class HearingRequest extends FormRequest
            'caseId' => 'required|exists:court_cases,caseId',
             'court_id' =>'required|integer|exists:court_lists,id',
             'date_time' => 'required|date_format:Y-m-d H:i:s',
+            'court_branch' => 'required|string|max:220',
         ];
     }
 }

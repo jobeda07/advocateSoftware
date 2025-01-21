@@ -18,8 +18,8 @@ class CourtCaseResource extends JsonResource
         $caseSec = explode(',', $this->case_section);
         $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
         return [
-            'id' => $this->id,
-            'caseID' => $this->caseID,
+           // 'id' => $this->id,
+            'caseId' => $this->caseId,
             'clientId' => $this->clientId ?? 'N/A',
             'client_name' => $this->clientAdd->name ?? 'N/A',
             'client_phone' => $this->clientAdd->phone ?? 'N/A',

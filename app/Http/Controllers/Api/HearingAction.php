@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\HearingRequest;
-use App\Http\Resources\hearingResource;
+use App\Http\Resources\HearingResource;
 use Exception;
 
 class HearingAction extends Controller
@@ -18,7 +18,7 @@ class HearingAction extends Controller
         try {
 
             $hearing = Hearing::orderBy('id','desc')->get();
-            return response()->json(['hearing_data' => hearingResource::collection($hearing) ,'status'=>200]);
+            return response()->json(['hearing_data' => HearingResource::collection($hearing) ,'status'=>200]);
          
         } catch (\Exception $e) {
             return response()->json([
@@ -31,11 +31,12 @@ class HearingAction extends Controller
     {   
 
         DB::beginTransaction();
-        // try {         
+        try {         
             $hearingData = Hearing::create([
                 'caseId' => $request->caseId,
                 'court_id' => $request->court_id,
                 'date_time' => $request->date_time,
+                'court_branch' => $request->court_branch,
                 'comment' => $request->comment,
                 'created_by' => auth()->user()->id,
             ]);
@@ -43,17 +44,17 @@ class HearingAction extends Controller
             DB::commit();
             
             return response([
-                'case-data' => new hearingResource($hearingData),
+                'case-data' => new HearingResource($hearingData),
                 'message' => 'Data Created successfully'
             ]);
             
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' => 'Something went wrong',
-        //         'status' => 500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' => 'Something went wrong',
+                'status' => 500
+            ]);
+        }
     }
     
     public function update(HearingRequest $request,$id){
@@ -77,7 +78,7 @@ class HearingAction extends Controller
             ]);
             DB::commit();
             return response([
-                'case-data'=> new hearingResource($hearingData),
+                'case-data'=> new HearingResource($hearingData),
                 'message' => 'Data Update successfully'
             ]);
         } catch (\Exception $e) {

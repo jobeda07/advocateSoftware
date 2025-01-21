@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('visitorId');
             $table->string('name');
             $table->string('phone');
-            $table->string('case_type');
+            $table->bigInteger('case_category_id');
+            $table->bigInteger('case_type');
             $table->double('fees');
             $table->text('reference')->nullable();
             $table->longtext('remark')->nullable();

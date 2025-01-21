@@ -7,8 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\CourtCase;
 use App\Models\CaseSection;
+use App\Models\CaseDocument;
+use App\Http\Resources\ClientResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\ClientRequest;
 use Exception;
 
 class ClientAction extends Controller
@@ -48,34 +51,21 @@ class ClientAction extends Controller
             ]);
         }
     }
-    public function store(Request $request){
-        $request->validate([
-            'name' => 'required|string|max:150',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'alternative_phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'email'=>'nullable|email',
-            'fathers_name' => 'required|string|max:150',
-            'profession' => 'required|string|max:150',
-            'division_id' => 'required|exists:divisions,id',
-            'district_id' => 'required|exists:districts,id',
-            'thana_id' => 'required|exists:thanas,id',
-            'address' => 'required|string|max:180',
-            'reference' => 'required|string|max:500',
-        ]);
+    public function store(ClientRequest $request){
         DB::beginTransaction();
         try{
-            $client = Client::orderBy('id', 'desc')->first();
-            if($client){
-                $lastId = $client->id;
-                $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-                $clientId ="CL$id";
+            $lastClient = Client::orderBy('id', 'desc')->first();
+            $timestamp = now()->format('Ymd');
+            if($lastClient){
+                $lastClientNumber = str_replace('CL', '', $lastClient->clientId);
+                $newClientNumber = $lastClientNumber + 1;
+                $newClientId = "CL{$newClientNumber}";
             }else{
                 $timestamp = now()->format('Ymd');
-                $clientId = "CL{$timestamp}01";
+                $newClientId = "CL{$timestamp}01";
             }
-
             $clientData=Client::create([
-                'clientId'=>$clientId,
+                'clientId'=>$newClientId,
                 'name'=>ucfirst($request->name),
                 'phone' => $request->phone,
                 'email' => $request->email ?? '',
@@ -102,24 +92,12 @@ class ClientAction extends Controller
             ]);
         }
     } 
-    public function update(Request $request,$id){
-        $request->validate([
-            'name' => 'required|string|max:150',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'alternative_phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'email'=>'nullable|email',
-            'fathers_name' => 'required|string|max:150',
-            'profession' => 'required|string|max:150',
-            'division_id' => 'required',
-            'district_id' => 'required',
-            'thana_id' => 'required',
-            'address' => 'required|string|max:180',
-            'reference' => 'required|string|max:500',
-        ]);
+    public function update(ClientRequest $request,$id){
+
         DB::beginTransaction();
         try{
 
-            $clientData=Client::find($id);
+            $clientData=Client::where('clientId',$id)->first();
             if(! $clientData){
                 return response()->json([
                     'error' =>'data not found',
@@ -158,8 +136,27 @@ class ClientAction extends Controller
     public function delete($id){
         DB::beginTransaction();
         try{
-            $clientData=Client::find($id);
+            $clientData=Client::where('clientId',$id)->first();
             if($clientData){
+                $cases = CourtCase::where('clientId',$clientData->clientId)->get();
+                if($cases){
+                    foreach($cases as $caseData){
+                        $casedocument=CaseDocument::where('courtCase_id',$caseData->id)->get();
+                            if($casedocument){
+                                foreach($casedocument as $item){
+                                    if ($item->case_image) {
+                                        $this->deleteOne($item->case_image);
+                                    }
+                                    if ($item->case_pdf) {
+                                        $removefile = public_path($item->case_pdf);
+                                        File::delete($removefile);
+                                    }
+                                    $item->delete();
+                                }
+                            }
+                        $caseData->delete();
+                    }
+                }
                 $clientData->delete();
             }
             DB::commit();
@@ -175,58 +172,41 @@ class ClientAction extends Controller
         }
     }
     public function show($id){
-       // try{
-            $clientData=Client::find($id);
+       try{
+            $clientData=Client::where('clientId',$id)->first();
             if(!$clientData){
                 return response()->json([
                     'error' =>'data not found',
                      'status'=>500
                 ]);
             }
-            $clientDataShow[] = [
-                'id' => $clientData->id,
-                'clientId' => $clientData->clientId ?? '',
-                'name' => $clientData->name ?? '',
-                'phone' => $clientData->phone ?? '',
-                'email' => $clientData->email ?? '',
-                'fathers_name' => $clientData->fathers_name ?? '',
-                'alternative_phone' => $clientData->alternative_phone ?? '',
-                'profession' => $clientData->profession ?? '',
-                'division_id' => $clientData->division_id?? '',
-                'district_id' => $clientData->district_id ?? '',
-                'thana_id' => $clientData->thana_id ?? '',
-                'address' => $clientData->address ?? '',
-                'reference' => $clientData->reference ?? '',
-                'created_by' => $clientData->createdBy->name ?? '',
-                'create_date_time' => $clientData->created_at->format('j F Y  g.i A'),
-            ];
-            $cases = CourtCase::where('clientId',$clientData->id)->orderBy('id','desc')->get();
+            $cases = CourtCase::where('clientId',$clientData->clientId)->orderBy('id','desc')->get();
             $caseData = [];
             foreach ($cases as $case){
                 $caseSec=explode(',',$case->case_section);
                 $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
                 $caseData[] = [
-                    'id' => $case->id,
-                    'caseID' => $case->caseID,
+                   // 'id' => $case->id,
+                    'caseId' => $case->caseId,
                     'case_section' => $caseSections->toArray(),
-                    'case_type' => $case->caseType->name,
-                    'case_stage' => $case->caseStage->name,
+                    'case_type' => $case->caseType->name ?? '',
+                    'case_stage' => $case->caseStage->name ?? '',
                     'fees' => $case->fees ?? '',
-                    'court' => $case->courtAdd->name,
+                    'court' => $case->courtAdd->name ?? '',
                     'create_date_time' => $case->created_at->format('j F Y  g.i A'),
                 ];
             }
            
             return response()->json([
-                'client' =>$clientData,
+                'client' =>new ClientResource($clientData),
                 'case_Data' =>$caseData,
                  'status'=>200
             ]);
-        // }catch (\Exception $e) {
-        //     return response()->json([
-        //         'error' =>'Somethink Went Wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        }catch (\Exception $e) {
+            return response()->json([
+                'error' =>'Somethink Went Wrong',
+                 'status'=>500
+            ]);
+        }
     }
 }

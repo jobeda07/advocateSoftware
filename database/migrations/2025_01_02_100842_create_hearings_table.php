@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('caseId');
             $table->bigInteger('court_id');
             $table->dateTime('date_time');
+            $table->string('court_branch')->nullable();
             $table->longText('comment')->nullable();
             $table->bigInteger('created_by');
             $table->timestamps();

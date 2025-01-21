@@ -13,17 +13,38 @@ class CaseTypeAction extends Controller
 {  
     public function index(){
         try {
-            $caseType = CaseType::orderBy('id','desc')->get();
+            // $caseType = CaseType::orderBy('id','desc')->get();
+            // $caseTypeData = [];
+
+            // foreach ($caseType as $item) {
+            //     $caseTypeData[] = [
+            //         'id' => $item->id,
+            //         'name' => $item->name,
+            //         'case_category'=>$item->case_category->name ?? ''
+            //     ];
+            // }
+            $caseType = CaseType::orderBy('id', 'desc')->get();
             $caseTypeData = [];
 
-            foreach ($caseType as $item) {
+            $groupedByCategory = $caseType->groupBy(function ($item) {
+                return $item->case_category->name ?? 'Uncategorized'; 
+            });
+
+            foreach ($groupedByCategory as $category => $items) {
                 $caseTypeData[] = [
-                    'id' => $item->id,
-                    'name' => $item->name
+                    'case_category' => $category,
+                    'case_types' => $items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'name' => $item->name,
+                        ];
+                    })->toArray(),
                 ];
             }
+
+
             return response()->json([
-                'caseType' =>$caseTypeData,
+                'caseTypeList' =>$caseTypeData,
                  'status'=>200
             ]);
         } catch (\Exception $e) {
@@ -36,12 +57,14 @@ class CaseTypeAction extends Controller
     public function store(Request $request){
         $request->validate([
             'name' => 'required|string|max:150',
+            'case_category_id' => 'required|exists:case_categories,id',
         ]);
         DB::beginTransaction();
         try{
 
             $caseTypeData=CaseType::create([
-                'name'=>ucfirst($request->name)
+                'name'=>ucfirst($request->name),
+                'case_category_id'=>$request->case_category_id
             ]);
             DB::commit();
             return response([
@@ -71,7 +94,8 @@ class CaseTypeAction extends Controller
                 ]);
             }
             $caseTypeData->update([
-                'name'=>ucfirst($request->name)
+                'name'=>ucfirst($request->name),
+                'case_category_id'=>$request->case_category_id
             ]);
             DB::commit();
             return response([

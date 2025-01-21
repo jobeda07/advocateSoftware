@@ -55,8 +55,8 @@ class EmployeeAction extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
         DB::beginTransaction();
-        try{
-            $image=[];
+        // try{
+            $image='';
             if (isset($request->image)) {
                 $file = $request->image;
                 $filename = $this->imageUpload($file, 300, 300, 'uploads/images/Employee/', true);
@@ -79,13 +79,13 @@ class EmployeeAction extends Controller
                 'employee-data'=> $employeeData,
                 'message' => 'Data Created successfully'
             ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' =>'Somethink went wrong',
-                 'status'=>500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' =>'Somethink went wrong',
+        //          'status'=>500
+        //     ]);
+        // }
     } 
     public function update(Request $request,$id){
         $request->validate([

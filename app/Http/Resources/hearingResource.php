@@ -21,6 +21,7 @@ class hearingResource extends JsonResource
             'client_phone' => $this->caseOf->clientAdd->phone ?? '',
             'court_name' => $this->courtOf->name ?? '',
             'date_time' => $this->date_time ?? '',
+            'court_branch' => $this->court_branch ?? '',
             'comment' => $this->comment ?? '',
             'createdBy' => $this->createdBy->name,
             'create_date_time' => $this->created_at->format('j F Y  g.i A')

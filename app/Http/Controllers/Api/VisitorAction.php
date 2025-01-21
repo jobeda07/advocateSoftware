@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Visitor;
+use App\Http\Requests\VisitorRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\VisitorResource;
 use Exception;
 
 
@@ -15,25 +17,8 @@ class VisitorAction extends Controller
     public function index(){
         try {    
             $visitor = Visitor::orderBy('id','desc')->get();
-            $visitorData = [];
-
-            foreach ($visitor as $item) {
-                $visitorData[] = [
-                    'id' => $item->id,
-                    'visitorId' => $item->visitorId,
-                    'name' => $item->name ?? '',
-                    'phone' => $item->phone ?? '',
-                    'case_type' => $item->casetype->name ?? '',
-                    'priority' => $item->priority,
-                    'fees'=>$item->fees ?? '',
-                    'reference'=>$item->reference ?? '',
-                    'remark'=>$item->remark ?? '',
-                    'created_by' => $item->createdBy->name ?? '',
-                    'create_date_time' => $item->created_at->format('j F Y  g.i A'),
-                ];
-            }
             return response()->json([
-                'visitor' =>$visitorData,
+                'visitor' => VisitorResource::collection($visitor),
                  'status'=>200
             ]);
         } catch (\Exception $e) {
@@ -43,32 +28,25 @@ class VisitorAction extends Controller
             ]);
         }
     }
-    public function store(Request $request){
-        $request->validate([
-            'name' => 'required|string',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'case_type' => 'required|exists:case_types,id',
-            'priority' => 'required|in:Low,Medium,High',
-            'fees' => 'required|integer',
-            'reference' => 'nullable|max:500',
-            'remark' => 'nullable',
-        ]);
-        DB::beginTransaction();
-        // try{
+    public function store(VisitorRequest $request){
 
-        $visitor = Visitor::orderBy('id', 'desc')->first();
-        if ($visitor) {
-            $lastId = $visitor->id;
-            $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-            $visitorId = "VI{$id}";
-        } else {
+        DB::beginTransaction();
+        try{
+
+            $lastVisitor = Visitor::orderBy('id', 'desc')->first();
             $timestamp = now()->format('Ymd');
-            $visitorId = "VI{$timestamp}01";
-        }        
+            if ($lastVisitor) {
+                $lastVisitorNumber = str_replace('CL', '', $lastVisitor->clientId);
+                $newVisitorNumber = $lastVisitorNumber + 1;
+                $newVisitorId = "VI{$newVisitorNumber}";
+            }else {
+                $newVisitorId = "VI{$timestamp}01";
+            }   
             $visitorData=Visitor::create([
-                'visitorId'=>$visitorId,
+                'visitorId'=>$newVisitorId,
                 'name'=>$request->name,
                 'phone'=>$request->phone,
+                'case_category_id'=>$request->case_category_id,
                 'case_type'=>$request->case_type,
                 'priority'=>$request->priority,
                 'fees'=>$request->fees,
@@ -78,30 +56,23 @@ class VisitorAction extends Controller
             ]);
             DB::commit();
             return response([
-                'visitor-data'=> $visitorData,
+                'visitor-data'=> new VisitorResource($visitorData),
                 'message' => 'Data Created successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
-    public function update(Request $request,$id){
-        $request->validate([
-            'name' => 'required|string',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'case_type' => 'required|exists:case_types,id',
-            'priority' => 'required|in:Low,Medium,High',
-            'fees' => 'required|integer',
-            'reference' => 'nullable|max:500',
-            'remark' => 'nullable',
-        ]);
+    public function update(VisitorRequest $request,$id){
+        
         DB::beginTransaction();
+
         try{
-            $visitorData=visitor::find($id);
+            $visitorData=visitor::where('visitorId',$id)->first();
             if(!$visitorData){
                 return response()->json([
                     'error' =>'data not found',
@@ -112,6 +83,7 @@ class VisitorAction extends Controller
                 'visitorId'=>$visitorData->visitorId,
                 'name'=>$request->name,
                 'phone'=>$request->phone,
+                'case_category_id'=>$request->case_category_id,
                 'case_type'=>$request->case_type,
                 'priority'=>$request->priority,
                 'fees'=>$request->fees,
@@ -121,9 +93,10 @@ class VisitorAction extends Controller
             ]);
             DB::commit();
             return response([
-                'visitor-data'=> $visitorData,
+                'visitor-data'=> new VisitorResource($visitorData),
                 'message' => 'Data Update successfully'
             ]);
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
@@ -136,7 +109,7 @@ class VisitorAction extends Controller
     public function delete($id){
         DB::beginTransaction();
         try{
-            $visitorData=visitor::find($id);
+            $visitorData=visitor::where('visitorId',$id)->first();
             if($visitorData){
                 $visitorData->delete();
             }

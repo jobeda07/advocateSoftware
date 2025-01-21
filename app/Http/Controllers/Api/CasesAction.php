@@ -20,14 +20,14 @@ class CasesAction extends Controller
 {  
     use ImageUpload;
     public function index(){
-       // try {
+       try {
             $case = CourtCase::orderBy('id','desc')->get();
             $caseData = [];
             foreach ($case as $item) {
                 $caseSec=explode(',',$item->case_section);
                 $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
                 $caseData[] = [
-                    'id' => $item->id,
+                    //'id' => $item->id,
                     'caseId' => $item->caseId,
                     'clientId' => $item->clientId ?? '',
                     'case_section' => $caseSections->toArray(),
@@ -43,19 +43,19 @@ class CasesAction extends Controller
                 'case' =>$caseData,
                  'status'=>200
             ]);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'error' =>'data not found',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
     } 
     public function store(CourtCaseRequest $request)
     {
        
     
         DB::beginTransaction();
-        try {
+        //try {
             // Create case data
             $witnesses=[];
             if($request->witnesses){
@@ -67,17 +67,19 @@ class CasesAction extends Controller
             }, $request->witnesses);
           }
 
-          $caseId = CourtCase::orderBy('id', 'desc')->first();
-            if ($caseId) {
-                $lastId = $caseId->id;
-                $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-                $caseId = "CA{$id}";
-            } else {
-                $timestamp = now()->format('Ymd');
-                $caseId = "CA{$timestamp}01";
+            $lastCase = CourtCase::orderBy('id', 'desc')->first();
+            $timestamp = now()->format('Ymd');
+            if ($lastCase) {
+                $lastCaseNumber = str_replace('CA', '', $lastCase->caseId);
+                $newCaseNumber = $lastCaseNumber + 1;
+                $newCaseId = "CA{$newCaseNumber}";
             } 
+            else {
+                $newCaseId = "CA{$timestamp}0001";
+            }
+
             $caseData = CourtCase::create([
-                'caseId' => $caseId,
+                'caseId' => $newCaseId,
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
@@ -127,20 +129,20 @@ class CasesAction extends Controller
                 'message' => 'Data Created successfully'
             ]);
             
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' => 'Something went wrong',
-                'status' => 500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' => 'Something went wrong',
+        //         'status' => 500
+        //     ]);
+        // }
     }
     
-    public function update(CourtCaseRequest $request,$id){
+    public function update(CourtCaseRequest $request,$caseId){
         
         DB::beginTransaction();
         try{
-            $caseData=CourtCase::find($id);
+            $caseData=CourtCase::where('caseId',$caseId)->first();
             //dd($caseData);
             if(! $caseData){
                 return response()->json([
@@ -157,7 +159,7 @@ class CasesAction extends Controller
                 }, $request->witnesses);
             }
             $caseData->update([
-                'caseID' => $caseData->caseID,
+                'caseId' => $caseData->caseId,
                 'clientId' => $request->clientId,
                 'client_type' => $request->client_type,
                 'case_type' => $request->case_type,
@@ -210,10 +212,16 @@ class CasesAction extends Controller
         }
     } 
 
-    public function delete($id){
+    public function delete($caseId){
         DB::beginTransaction();
         try{
-            $caseData=CourtCase::find($id);
+            $caseData=CourtCase::where('caseId',$caseId)->first();
+            if(! $caseData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
             $casedocument=CaseDocument::where('courtCase_id',$caseData->id)->get();
             if($casedocument){
                 foreach($casedocument as $item){
@@ -269,9 +277,9 @@ class CasesAction extends Controller
         }
     }
 
-    public function show($id){
+    public function show($caseId){
         try {
-            $case = CourtCase::find($id);
+            $case = CourtCase::where('caseId',$caseId)->first();
             $caseData =new CourtCaseResource($case);
             
             return response()->json([
@@ -286,13 +294,13 @@ class CasesAction extends Controller
         }
     }
 
-    public function case_lower_store(Request $request,$id){
+    public function case_lower_store(Request $request,$caseId){
         DB::beginTransaction();
         $request->validate([
             'case_lower_id' => 'required|exists:users,id',
         ]);
         try{
-            $case=CourtCase::find($id);
+            $case=CourtCase::where('caseId',$caseId)->first();
             if($case){
                 $case->case_lower_id=$request->case_lower_id;
                 $case->save();
