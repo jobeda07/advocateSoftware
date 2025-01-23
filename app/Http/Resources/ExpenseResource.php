@@ -23,7 +23,8 @@ class ExpenseResource extends JsonResource
             'payment_type' => $this->payment_type,
             'comment' => $this->comment,
             'created_by' => $this->createdBy->name ?? '',
-            'create_date_time' => $this->created_at->format('j F Y  g.i A')
+            'create_date_time' => $this->created_at->format('j F Y  g.i A'),
+            'voucher_image' => $this->voucher_image ?? ''
         ];
     }
 }
