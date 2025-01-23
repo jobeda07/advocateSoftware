@@ -36,7 +36,7 @@ class VisitorAction extends Controller
             $lastVisitor = Visitor::orderBy('id', 'desc')->first();
             $timestamp = now()->format('Ymd');
             if ($lastVisitor) {
-                $lastVisitorNumber = str_replace('CL', '', $lastVisitor->clientId);
+                $lastVisitorNumber = str_replace('VI', '', $lastVisitor->visitorId);
                 $newVisitorNumber = $lastVisitorNumber + 1;
                 $newVisitorId = "VI{$newVisitorNumber}";
             }else {
@@ -67,7 +67,7 @@ class VisitorAction extends Controller
             ]);
         }
     } 
-    public function update(VisitorRequest $request,$id){
+    public function update(Request $request,$id){
         
         DB::beginTransaction();
 
@@ -83,8 +83,8 @@ class VisitorAction extends Controller
                 'visitorId'=>$visitorData->visitorId,
                 'name'=>$request->name,
                 'phone'=>$request->phone,
-                'case_category_id'=>$request->case_category_id,
-                'case_type'=>$request->case_type,
+                'case_category_id'=>$request->case_category_id ?? $visitorData->case_category_id,
+                'case_type'=>$request->case_type ?? $visitorData->case_type,
                 'priority'=>$request->priority,
                 'fees'=>$request->fees,
                 'reference'=>$request->reference,

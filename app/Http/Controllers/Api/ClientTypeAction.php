@@ -19,7 +19,7 @@ class ClientTypeAction extends Controller
             foreach ($clientType as $item) {
                 $clientTypeData[] = [
                     'id' => $item->id,
-                    'title' => $item->title
+                    'name' => $item->name
                 ];
             }
             return response()->json([
@@ -35,13 +35,13 @@ class ClientTypeAction extends Controller
     }
     public function store(Request $request){
         $request->validate([
-            'title' => 'required|string|max:150',
+            'name' => 'required|string|max:150',
         ]);
         DB::beginTransaction();
         try{
 
             $clientTypeData=ClientType::create([
-                'title'=>ucfirst($request->title)
+                'name'=>ucfirst($request->name)
             ]);
             DB::commit();
             return response([
@@ -58,7 +58,7 @@ class ClientTypeAction extends Controller
     } 
     public function update(Request $request,$id){
         $request->validate([
-            'title' => 'required|string|max:150',
+            'name' => 'required|string|max:150',
         ]);
         DB::beginTransaction();
         try{
@@ -71,7 +71,7 @@ class ClientTypeAction extends Controller
                 ]);
             }
             $clientTypeData->update([
-                'title'=>ucfirst($request->title)
+                'name'=>ucfirst($request->name)
             ]);
             DB::commit();
             return response([

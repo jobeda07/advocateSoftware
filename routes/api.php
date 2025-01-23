@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\EmployeeAction;
 use App\Http\Controllers\Api\HearingAction;
 use App\Http\Controllers\Api\CaseFeeAction;
 use App\Http\Controllers\Api\CaseExtraFeeAction;
+use App\Http\Controllers\Api\ExpenseAction;
+use App\Http\Controllers\Api\ExpenseCategoryAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -121,5 +123,17 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [CaseExtraFeeAction::class, 'store']); 
         Route::post('update/{id}', [CaseExtraFeeAction::class, 'update']);
         Route::get('delete/{id}', [CaseExtraFeeAction::class, 'delete']);
+    });
+    Route::prefix('expense-category')->group(function () {
+        Route::get('/', [ExpenseCategoryAction::class, 'index']);
+        Route::post('store', [ExpenseCategoryAction::class, 'store']); 
+        Route::post('update/{id}', [ExpenseCategoryAction::class, 'update']);
+        Route::get('delete/{id}', [ExpenseCategoryAction::class, 'delete']);
+    });
+    Route::prefix('expense')->group(function () {
+        Route::get('/', [ExpenseAction::class, 'index']);
+        Route::post('store', [ExpenseAction::class, 'store']); 
+        Route::post('update/{id}', [ExpenseAction::class, 'update']);
+        Route::get('delete/{id}', [ExpenseAction::class, 'delete']);
     }); 
 });

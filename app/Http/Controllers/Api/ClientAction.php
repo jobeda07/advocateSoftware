@@ -22,6 +22,7 @@ class ClientAction extends Controller
             $clientData = [];
 
             foreach ($client as $item) {
+                $cases=CourtCase::where('clientId',$item->clientId)->count();
                 $clientData[] = [
                     'id' => $item->id,
                     'clientId' => $item->clientId ?? '',
@@ -36,6 +37,7 @@ class ClientAction extends Controller
                     'thana_id' => $item->thana_id ?? '',
                     'address' => $item->address ?? '',
                     'reference' => $item->reference ?? '',
+                    'cases' => $cases ?? '',
                     'created_by' => $item->createdBy->name ?? '',
                     'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
@@ -189,10 +191,12 @@ class ClientAction extends Controller
                    // 'id' => $case->id,
                     'caseId' => $case->caseId,
                     'case_section' => $caseSections->toArray(),
+                    'client_type' => $case->clientType->name ?? '',
                     'case_type' => $case->caseType->name ?? '',
+                    'case_category' => $case->caseCategory->name ?? '',
                     'case_stage' => $case->caseStage->name ?? '',
                     'fees' => $case->fees ?? '',
-                    'court' => $case->courtAdd->name ?? '',
+                    //'court' => $case->courtAdd->name ?? '',
                     'create_date_time' => $case->created_at->format('j F Y  g.i A'),
                 ];
             }

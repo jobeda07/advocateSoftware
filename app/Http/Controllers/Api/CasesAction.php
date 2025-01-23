@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CourtCase;
+use App\Models\Hearing;
 use App\Models\CaseSection;
 use App\Models\CaseDocument;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Exception;
 use Auth;
+use DateTime;
 use App\Http\Requests\CourtCaseRequest;
 use App\Traits\ImageUpload;
 use App\Http\Resources\CourtCaseResource;
@@ -26,15 +28,21 @@ class CasesAction extends Controller
             foreach ($case as $item) {
                 $caseSec=explode(',',$item->case_section);
                 $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+                $hearing=Hearing::where('caseId',$item->caseId)->latest()->first();
                 $caseData[] = [
                     //'id' => $item->id,
                     'caseId' => $item->caseId,
                     'clientId' => $item->clientId ?? '',
+                    'client_name' => $item->clientAdd->name ?? '',
+                    'client_phone' => $item->clientAdd->phone ?? '',
                     'case_section' => $caseSections->toArray(),
+                    'case_category' => $item->caseCategory->name,
+                    'priority' => $item->priority,
                     'case_type' => $item->caseType->name ?? '',
                     'case_stage' => $item->caseStage->name ?? '',
-                    'client_type' => $item->clientType->title ?? '',
+                    'client_type' => $item->clientType->name ?? '',
                     'court' => $item->courtAdd->name ?? '',
+                    'next_hearing' => isset($hearing->date_time) ? (new DateTime($hearing->date_time))->format('j F Y g.i A') : '',
                     'case_lower' => $item->caseLower->name ?? '',
                     'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
@@ -89,6 +97,8 @@ class CasesAction extends Controller
                 'court_id' => $request->court_id,
                 'court_branch' => $request->court_branch,
                 'fees' => $request->fees,
+                'branch' => $request->branch,
+                'priority' => $request->priority,
                 'comments' => $request->comments,
                 'opposition_phone' => $request->opposition_phone,
                 'opposition_name' => ucfirst($request->opposition_name),
@@ -102,7 +112,7 @@ class CasesAction extends Controller
                 foreach ($request->case_doc_name as $index => $name) {
                     $data = [
                         'courtCase_id' => $caseData->id,
-                        'case_doc_name' => $name,
+                        'name' => $name,
                     ];
     
                     if (isset($request->case_image[$index])) {
@@ -170,6 +180,8 @@ class CasesAction extends Controller
                 'court_id' => $request->court_id,
                 'fees' => $request->fees,
                 'comments' => $request->comments,
+                'branch' => $request->branch,
+                'priority' => $request->priority,
                 'opposition_phone' => $request->opposition_phone,
                 'opposition_name' => ucfirst($request->opposition_name),
             ]);

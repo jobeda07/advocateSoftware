@@ -31,18 +31,19 @@ class CaseFeeAction extends Controller
 
         DB::beginTransaction();
         try {    
-            $feeId = CaseFee::orderBy('id', 'desc')->first();
-            if ($feeId) {
-                $lastId = $feeId->id;
-                $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-                $feeId = "CTR{$id}";
-            } else {
-                $timestamp = now()->format('Ymd');
-                $feeId = "CTR{$timestamp}01";
-            } 
+            $lastFee = CaseFee::orderBy('id', 'desc')->first();
+            $timestamp = now()->format('Ymd');
+
+            if ($lastFee) {
+                $lastFeeNumber = str_replace('CTR', '', $lastFee->id);
+                $newFeeNumber = $lastFeeNumber + 1;
+                $newFeeId = "CTR{$newFeeNumber}";
+            }else {
+                $newFeeId = "CTR{$timestamp}01";
+            }  
 
             $caseFeeData = CaseFee::create([
-                'transaction_no' => $feeId,
+                'transaction_no' => $newFeeId,
                 'caseId' => $request->caseId,
                 'amount' => $request->amount,
                 'payment_type' => $request->payment_type,

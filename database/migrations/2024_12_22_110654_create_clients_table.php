@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('address');
             $table->text('reference')->nullable();
             $table->bigInteger('created_by');
+            $table->integer('status')->default(0);
             $table->timestamps();
         });
     }
