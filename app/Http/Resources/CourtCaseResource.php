@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\CaseSection;
 use App\Models\Hearing;
+use App\Models\User;
 use DateTime;
 
 class CourtCaseResource extends JsonResource
@@ -18,7 +19,9 @@ class CourtCaseResource extends JsonResource
     public function toArray(Request $request): array
     {
         $caseSec = explode(',', $this->case_section);
+        $caselawers = explode(',', $this->case_lower_id );
         $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+        $lawer = User::whereIn('id', $caselawers)->get();
         $hearing=Hearing::where('caseId',$this->caseId)->latest()->first();
         return [
            // 'id' => $this->id,
@@ -44,7 +47,14 @@ class CourtCaseResource extends JsonResource
             'comments' => $this->comments ?? 'N/A',
             'witnesses' =>$this->witnesses ?? 'N/A',
             'created_by' =>$this->createdBy->name ?? 'N/A',
-            'case_lower' => $this->caseLower->name ?? 'N/A',
+            'case_lower' => $lawer->map(function ($user){
+                return[
+                   'id'=>$user->id,
+                   'name'=>$user->name,
+                   'email'=>$user->email,
+                   'phone'=>$user->phone,
+                ];
+            }),
             'next_hearing' => isset($hearing->date_time) ? (new DateTime($hearing->date_time))->format('j F Y g.i A') : '',
             'case_documents' => $this->caseDocument->map(function ($doc) {
                 return [

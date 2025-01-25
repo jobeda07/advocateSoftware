@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CourtCase;
 use App\Models\Hearing;
+use App\Models\User;
 use App\Models\CaseSection;
 use App\Models\CaseDocument;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,8 @@ class CasesAction extends Controller
                 $caseSec=explode(',',$item->case_section);
                 $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
                 $hearing=Hearing::where('caseId',$item->caseId)->latest()->first();
+                $caselawers = explode(',', $item->case_lower_id );
+                $lawer = User::whereIn('id', $caselawers)->get();
                 $caseData[] = [
                     //'id' => $item->id,
                     'caseId' => $item->caseId,
@@ -44,6 +47,7 @@ class CasesAction extends Controller
                     'court' => $item->courtAdd->name ?? '',
                     'next_hearing' => isset($hearing->date_time) ? (new DateTime($hearing->date_time))->format('j F Y g.i A') : '',
                     'case_lower' => $item->caseLower->name ?? '',
+                    'case_lower' => $lawer->pluck('name')->implode(', '),
                     'create_date_time' => $item->created_at->format('j F Y  g.i A'),
                 ];
             }
@@ -63,7 +67,7 @@ class CasesAction extends Controller
        
     
         DB::beginTransaction();
-        //try {
+        try {
             // Create case data
             $witnesses=[];
             if($request->witnesses){
@@ -83,7 +87,7 @@ class CasesAction extends Controller
                 $newCaseId = "CA{$newCaseNumber}";
             } 
             else {
-                $newCaseId = "CA{$timestamp}0001";
+                $newCaseId = "CA{$timestamp}01";
             }
 
             $caseData = CourtCase::create([
@@ -139,13 +143,13 @@ class CasesAction extends Controller
                 'message' => 'Data Created successfully'
             ]);
             
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' => 'Something went wrong',
-        //         'status' => 500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' => 'Something went wrong',
+                'status' => 500
+            ]);
+        }
     }
     
     public function update(CourtCaseRequest $request,$caseId){
@@ -314,9 +318,12 @@ class CasesAction extends Controller
         try{
             $case=CourtCase::where('caseId',$caseId)->first();
             if($case){
-                $case->case_lower_id=$request->case_lower_id;
-                $case->save();
+                return response([
+                    'message' => 'Case Id Not found'
+                ]); 
             }
+            $case->case_lower_id=$request->case_lower_id;
+            $case->save();
             DB::commit();
             return response([
                 'message' => ' Added Successfully'
