@@ -142,5 +142,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [CaseTaskAction::class, 'store']); 
         Route::post('update/{id}', [CaseTaskAction::class, 'update']);
         Route::get('delete/{id}', [CaseTaskAction::class, 'delete']);
+        Route::get('progress-list/{id}', [CaseTaskAction::class, 'progress_list']);
+        Route::post('progress-store/{id}', [CaseTaskAction::class, 'progress_store']);
     }); 
 });

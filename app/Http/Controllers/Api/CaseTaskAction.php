@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CaseTask;
+use App\Models\TaskProgress;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\CaseTaskRequest;
 use App\Http\Resources\CaseTaskResource;
+use App\Http\Resources\TaskProgressResource;
 
 class CaseTaskAction extends Controller
 {  
@@ -112,4 +114,58 @@ class CaseTaskAction extends Controller
             ]);
         }
     } 
+
+    public function progress_list(Request $request,$id)
+    {   
+
+        try {
+
+            $TaskProgress = TaskProgress::where('case_task_id',$id)->orderBy('id','desc')->get();
+            return response()->json(['caseTask_data' => TaskProgressResource::collection($TaskProgress) ,'status'=>200]);
+         
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
+    }
+    public function progress_store(Request $request ,$id)
+    {  
+        $request->validate([
+            'progress' => 'required|max:100',
+            'remarks' => 'required',
+        ]); 
+        $caseTask = CaseTask::find($id);
+        if(!$caseTask){
+            return response()->json([
+                'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
+        DB::beginTransaction();
+        try {    
+        
+            $TaskProgress = TaskProgress::create([
+                'case_task_id' => $caseTask->id,
+                'progress' => $request->progress,
+                'remarks' => $request->remarks,
+                'created_by' => auth()->user()->id,
+            ]);
+    
+            DB::commit();
+            
+            return response([
+                'case-data' => new TaskProgressResource($TaskProgress),
+                'message' => 'Data Created successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' => 'Something went wrong',
+                'status' => 500
+            ]);
+        }
+    }
 }
