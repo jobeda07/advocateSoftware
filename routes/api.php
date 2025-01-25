@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\CaseFeeAction;
 use App\Http\Controllers\Api\CaseExtraFeeAction;
 use App\Http\Controllers\Api\ExpenseAction;
 use App\Http\Controllers\Api\ExpenseCategoryAction;
+use App\Http\Controllers\Api\CaseTaskAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -135,5 +136,11 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [ExpenseAction::class, 'store']); 
         Route::post('update/{id}', [ExpenseAction::class, 'update']);
         Route::get('delete/{id}', [ExpenseAction::class, 'delete']);
+    }); 
+    Route::prefix('case-task')->group(function () {
+        Route::get('/', [CaseTaskAction::class, 'index']);
+        Route::post('store', [CaseTaskAction::class, 'store']); 
+        Route::post('update/{id}', [CaseTaskAction::class, 'update']);
+        Route::get('delete/{id}', [CaseTaskAction::class, 'delete']);
     }); 
 });
