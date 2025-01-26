@@ -14,26 +14,26 @@ use App\Http\Requests\ExpenseRequest;
 use App\Http\Resources\ExpenseResource;
 
 class ExpenseAction extends Controller
-{  
+{
     use ImageUpload;
     public function index(){
         try {
 
             $expense = Expense::orderBy('id','desc')->get();
             return response()->json(['expense_data' => ExpenseResource::collection($expense) ,'status'=>200]);
-         
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' =>'data not found',
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function store(expenseRequest $request)
-    {   
+    {
 
         DB::beginTransaction();
-       // try {    
+       // try {
             $lastExpense = Expense::orderBy('id', 'desc')->first();
             $timestamp = now()->format('Ymd');
             if ($lastExpense) {
@@ -42,7 +42,7 @@ class ExpenseAction extends Controller
                 $newtransaction_no = "EX{$newExpenseNumber}";
             }else {
                 $newtransaction_no = "EX{$timestamp}01";
-            } 
+            }
 
             $expenseData = Expense::create([
                 'transaction_no' => $newtransaction_no,
@@ -59,14 +59,14 @@ class ExpenseAction extends Controller
                 $expenseData->voucher_image = 'uploads/images/voucherImage/' . $filename;
                 $expenseData ->save();
             }
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new ExpenseResource($expenseData),
                 'message' => 'Data Created successfully'
             ]);
-            
+
         // } catch (\Exception $e) {
         //     DB::rollback();
         //     return response()->json([
@@ -75,7 +75,7 @@ class ExpenseAction extends Controller
         //     ]);
         // }
     }
-    
+
     public function update(ExpenseRequest $request,$id){
 
         DB::beginTransaction();
@@ -116,12 +116,12 @@ class ExpenseAction extends Controller
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
         try{
-            $expenseData=expense::find($id);
+            $expenseData=Expense::find($id);
             if($expenseData){
                 $this->deleteOne($expenseData->voucher_image);
                 $expenseData->delete();
@@ -137,6 +137,6 @@ class ExpenseAction extends Controller
                  'status'=>500
             ]);
         }
-    } 
+    }
 }
 
