@@ -40,6 +40,7 @@ Route::get('logout', [AuthAction::class, 'logout'])->middleware(['auth:sanctum']
 Route::get('home-section/show', [HomeAction::class, 'show']);
 Route::get('about-section/show', [AboutAction::class, 'show']);
 Route::get('contact-section/show', [ContactAction::class, 'show']);
+Route::get('services-section/list', [ServiceAction::class, 'index']);
 
  // *****  admin    ********   //
 Route::middleware('auth:sanctum')->group(function (){
