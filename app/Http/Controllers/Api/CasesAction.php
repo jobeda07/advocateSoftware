@@ -61,6 +61,28 @@ class CasesAction extends Controller
                  'status'=>500
             ]);
         }
+    }
+     public function all_list(){
+       try {
+            $case = CourtCase::orderBy('id','desc')->get();
+            $caseData = [];
+            foreach ($case as $item) {
+                $caseData[] = [
+                    'caseId' => $item->caseId,
+                    'client_name' => $item->clientAdd->name ?? '',
+                    'client_phone' => $item->clientAdd->phone ?? '',
+                ];
+            }
+            return response()->json([
+                'all_case_list' =>$caseData,
+                 'status'=>200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
+                 'status'=>500
+            ]);
+        }
     } 
     public function store(CourtCaseRequest $request)
     {

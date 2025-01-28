@@ -36,11 +36,11 @@ Route::post('sign-up', [AuthAction::class, 'registration']);
 Route::post('sign-in', [AuthAction::class, 'login']); 
 Route::get('logout', [AuthAction::class, 'logout'])->middleware(['auth:sanctum']);
 
-//frontend
-
+            // *****  frontend    ********   //
 Route::get('home-section/show', [HomeAction::class, 'show']);
+Route::get('about-section/show', [AboutAction::class, 'show']);
 
-
+ // *****  admin    ********   //
 Route::middleware('auth:sanctum')->group(function (){
     Route::prefix('court-list')->group(function () {
         Route::get('/', [CourtListAction::class, 'index']);
@@ -102,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function (){
     });
     Route::prefix('cases')->group(function () {
         Route::get('/', [CasesAction::class, 'index']);
+        Route::get('/all-list', [CasesAction::class, 'all_list']);
         Route::post('store', [CasesAction::class, 'store']); 
         Route::post('update/{id}', [CasesAction::class, 'update']);
         Route::get('delete/{id}', [CasesAction::class, 'delete']);

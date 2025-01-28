@@ -14,6 +14,28 @@ class AboutAction extends Controller
 {
     use ImageUpload;
 
+    public function show(){
+        try{
+            $aboutData = About::first();
+            // dd($aboutData);
+            if(!isset($aboutData)){
+                return response()->json([
+                    'status'=>false,
+                    'message' =>'Data not found',
+                ], 404);
+            }
+            return response([
+                'about-data'=> new AboutResource($aboutData),
+                'status'=>200
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Something went wrong',
+                'status'=>500
+            ]);
+        }
+    }
     public function update(AboutRequest $request){
         //dd('fg');
         DB::beginTransaction();
