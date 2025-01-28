@@ -105,9 +105,13 @@ class CaseFeeAction extends Controller
         DB::beginTransaction();
         try{
             $caseFeeData=CaseFee::find($id);
-            if($caseFeeData){
-                $caseFeeData->delete();
+            if(!$caseFeeData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $caseFeeData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

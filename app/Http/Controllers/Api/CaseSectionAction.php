@@ -99,9 +99,13 @@ class CaseSectionAction extends Controller
         DB::beginTransaction();
         try{
             $caseSectionData=CaseSection::find($id);
-            if($caseSectionData){
-                $caseSectionData->delete();
+            if(!$caseSectionData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $caseSectionData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

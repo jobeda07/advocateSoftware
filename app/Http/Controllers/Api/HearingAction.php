@@ -94,9 +94,13 @@ class HearingAction extends Controller
         DB::beginTransaction();
         try{
             $hearingData=Hearing::find($id);
-            if($hearingData){
-                $hearingData->delete();
+            if(!$hearingData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $hearingData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

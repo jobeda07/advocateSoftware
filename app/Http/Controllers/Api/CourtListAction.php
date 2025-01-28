@@ -65,6 +65,12 @@ class CourtListAction extends Controller
         try{
 
             $courtdata=CourtList::find($id);
+            if(! $courtdata){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
             $courtdata->update([
                 'name'=>ucfirst($request->name)
             ]);
@@ -86,9 +92,13 @@ class CourtListAction extends Controller
         DB::beginTransaction();
         try{
             $courtdata=CourtList::find($id);
-            if($courtdata){
-                $courtdata->delete();
+            if(! $courtdata){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $courtdata->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

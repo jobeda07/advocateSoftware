@@ -139,28 +139,32 @@ class ClientAction extends Controller
         DB::beginTransaction();
         try{
             $clientData=Client::where('clientId',$id)->first();
-            if($clientData){
-                $cases = CourtCase::where('clientId',$clientData->clientId)->get();
-                if($cases){
-                    foreach($cases as $caseData){
-                        $casedocument=CaseDocument::where('courtCase_id',$caseData->id)->get();
-                            if($casedocument){
-                                foreach($casedocument as $item){
-                                    if ($item->case_image) {
-                                        $this->deleteOne($item->case_image);
-                                    }
-                                    if ($item->case_pdf) {
-                                        $removefile = public_path($item->case_pdf);
-                                        File::delete($removefile);
-                                    }
-                                    $item->delete();
-                                }
-                            }
-                        $caseData->delete();
-                    }
-                }
-                $clientData->delete();
+            if(! $clientData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $cases = CourtCase::where('clientId',$clientData->clientId)->get();
+            if($cases){
+                foreach($cases as $caseData){
+                    $casedocument=CaseDocument::where('courtCase_id',$caseData->id)->get();
+                        if($casedocument){
+                            foreach($casedocument as $item){
+                                if ($item->case_image) {
+                                    $this->deleteOne($item->case_image);
+                                }
+                                if ($item->case_pdf) {
+                                    $removefile = public_path($item->case_pdf);
+                                    File::delete($removefile);
+                                }
+                                $item->delete();
+                            }
+                        }
+                    $caseData->delete();
+                }
+            }
+            $clientData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

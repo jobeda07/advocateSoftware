@@ -92,9 +92,13 @@ class ExpenseCategoryAction extends Controller
         DB::beginTransaction();
         try{
             $expenseCategoryData=ExpenseCategory::find($id);
-            if($expenseCategoryData){
-                $expenseCategoryData->delete();
+            if(! $expenseCategoryData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $expenseCategoryData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

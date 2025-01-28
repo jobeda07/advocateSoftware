@@ -91,9 +91,13 @@ class ClientTypeAction extends Controller
         DB::beginTransaction();
         try{
             $clientTypeData=ClientType::find($id);
-            if($clientTypeData){
-                $clientTypeData->delete();
+            if(! $clientTypeData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $clientTypeData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

@@ -144,10 +144,14 @@ class EmployeeAction extends Controller
         DB::beginTransaction();
         try{
             $employeeData=User::find($id);
-            if($employeeData){
-                $this->deleteOne($employeeData->image);
-                $employeeData->delete();
+            if(! $employeeData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $this->deleteOne($employeeData->image);
+            $employeeData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

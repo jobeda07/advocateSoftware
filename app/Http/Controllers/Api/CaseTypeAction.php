@@ -115,9 +115,13 @@ class CaseTypeAction extends Controller
         DB::beginTransaction();
         try{
             $caseTypeData=CaseType::find($id);
-            if($caseTypeData){
-                $caseTypeData->delete();
+            if(! $caseTypeData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $caseTypeData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

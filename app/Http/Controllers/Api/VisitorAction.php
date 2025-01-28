@@ -110,9 +110,13 @@ class VisitorAction extends Controller
         DB::beginTransaction();
         try{
             $visitorData=visitor::where('visitorId',$id)->first();
-            if($visitorData){
-                $visitorData->delete();
+            if(!$visitorData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $visitorData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

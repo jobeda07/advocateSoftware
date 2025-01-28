@@ -17,6 +17,9 @@ class HearingResource extends JsonResource
         return [
             'id' => $this->id,
             'caseId' => $this->caseId ?? '',
+            'case_category' => $this->caseOf->caseCategory->name?? '',
+            'case_stage' => $this->caseOf->caseStage->name?? '',
+            'client_Type' => $this->caseOf->clientType->name ?? '',
             'client_name' => $this->caseOf->clientAdd->name ?? '',
             'client_phone' => $this->caseOf->clientAdd->phone ?? '',
             'court_name' => $this->courtOf->name ?? '',
@@ -24,6 +27,7 @@ class HearingResource extends JsonResource
             'court_branch' => $this->court_branch ?? '',
             'comment' => $this->comment ?? '',
             'createdBy' => $this->createdBy->name,
+            'inform' => 'No',
             'create_date_time' => $this->created_at->format('j F Y  g.i A')
         ];
     }

@@ -317,7 +317,7 @@ class CasesAction extends Controller
         ]);
         try{
             $case=CourtCase::where('caseId',$caseId)->first();
-            if($case){
+            if(!$case){
                 return response([
                     'message' => 'Case Id Not found'
                 ]); 

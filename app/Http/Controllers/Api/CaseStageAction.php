@@ -91,9 +91,13 @@ class CaseStageAction extends Controller
         DB::beginTransaction();
         try{
             $caseStageData=CaseStage::find($id);
-            if($caseStageData){
-                $caseStageData->delete();
+            if(!$caseStageData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            $caseStageData->delete();
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'

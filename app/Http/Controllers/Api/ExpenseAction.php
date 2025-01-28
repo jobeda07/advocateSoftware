@@ -122,10 +122,16 @@ class ExpenseAction extends Controller
         DB::beginTransaction();
         try{
             $expenseData=expense::find($id);
-            if($expenseData){
-                $this->deleteOne($expenseData->voucher_image);
-                $expenseData->delete();
+            if(! $expenseData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
             }
+            
+            $this->deleteOne($expenseData->voucher_image);
+            $expenseData->delete();
+            
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'
