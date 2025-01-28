@@ -19,6 +19,12 @@ use App\Http\Controllers\Api\CaseExtraFeeAction;
 use App\Http\Controllers\Api\ExpenseAction;
 use App\Http\Controllers\Api\ExpenseCategoryAction;
 use App\Http\Controllers\Api\CaseTaskAction;
+use App\Http\Controllers\Api\HomeAction;
+use App\Http\Controllers\Api\AboutAction;
+use App\Http\Controllers\Api\ServiceAction;
+use App\Http\Controllers\Api\TestimonialAction;
+use App\Http\Controllers\Api\ContactAction;
+use App\Http\Controllers\Api\ToDoListAction;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -29,6 +35,10 @@ Route::get('/user', function (Request $request) {
 Route::post('sign-up', [AuthAction::class, 'registration']);
 Route::post('sign-in', [AuthAction::class, 'login']); 
 Route::get('logout', [AuthAction::class, 'logout'])->middleware(['auth:sanctum']);
+
+//frontend
+
+Route::get('home-section/show', [HomeAction::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->group(function (){
@@ -145,4 +155,37 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('progress-list/{id}', [CaseTaskAction::class, 'progress_list']);
         Route::post('progress-store/{id}', [CaseTaskAction::class, 'progress_store']);
     }); 
+    Route::prefix('home-section')->group(function () {
+        Route::post('update', [HomeAction::class, 'update']);
+    });
+
+    Route::prefix('about-section')->group(function () {
+        Route::post('update', [AboutAction::class, 'update']);
+    });
+
+    Route::prefix('services')->group(function () {
+        Route::get('/', [ServiceAction::class, 'index']);
+        Route::post('store', [ServiceAction::class, 'store']);
+        Route::post('update/{id}', [ServiceAction::class, 'update']);
+        Route::get('delete/{id}', [ServiceAction::class, 'delete']);
+    });
+
+    Route::prefix('testimonials')->group(function () {
+        Route::get('/', [TestimonialAction::class, 'index']);
+        Route::post('store', [TestimonialAction::class, 'store']);
+        Route::post('update/{id}', [TestimonialAction::class, 'update']);
+        Route::get('delete/{id}', [TestimonialAction::class, 'delete']);
+    });
+
+    Route::prefix('contact-section')->group(function () {
+        Route::post('update', [ContactAction::class, 'update']);
+    });
+
+    Route::prefix('todo-lists')->group(function () {
+        Route::get('/', [ToDoListAction::class, 'index']);
+        Route::post('store', [ToDoListAction::class, 'store']);
+        Route::post('update/{id}', [ToDoListAction::class, 'update']);
+        Route::get('show/{id}', [ToDoListAction::class, 'show']);
+        Route::get('delete/{id}', [ToDoListAction::class, 'delete']);
+    });
 });
