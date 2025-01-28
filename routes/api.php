@@ -39,6 +39,7 @@ Route::get('logout', [AuthAction::class, 'logout'])->middleware(['auth:sanctum']
             // *****  frontend    ********   //
 Route::get('home-section/show', [HomeAction::class, 'show']);
 Route::get('about-section/show', [AboutAction::class, 'show']);
+Route::get('contact-section/show', [ContactAction::class, 'show']);
 
  // *****  admin    ********   //
 Route::middleware('auth:sanctum')->group(function (){

@@ -16,11 +16,11 @@ class ExpenseResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'transaction_no' => $this->transaction_no,
+            'expenseId' => $this->transaction_no,
             'caseId' => $this->caseId,
             'expense_category' => $this->expense_category->name ?? '',
             'amount' => $this->amount,
-            'payment_type' => $this->payment_type,
+            'payment_method' => $this->payment_method,
             'comment' => $this->comment,
             'created_by' => $this->createdBy->name ?? '',
             'create_date_time' => $this->created_at->format('j F Y  g.i A'),
