@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\AboutAction;
 use App\Http\Controllers\Api\ServiceAction;
 use App\Http\Controllers\Api\TestimonialAction;
 use App\Http\Controllers\Api\ContactAction;
+use App\Http\Controllers\Api\PermissionAction;
 use App\Http\Controllers\Api\ToDoListAction;
 use Illuminate\Support\Facades\Route;
 
@@ -32,8 +33,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::post('sign-up', [AuthAction::class, 'registration']);
-Route::post('sign-in', [AuthAction::class, 'login']); 
+//Route::post('sign-up', [AuthAction::class, 'registration']);
+Route::post('login', [AuthAction::class, 'login'])->name('login'); 
+
 Route::get('logout', [AuthAction::class, 'logout'])->middleware(['auth:sanctum']);
 
             // *****  frontend    ********   //
@@ -76,10 +78,10 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('delete/{id}', [CaseStageAction::class, 'delete']);
     });
     Route::prefix('visitor')->group(function () {
-        Route::get('/', [VisitorAction::class, 'index']);
-        Route::post('store', [VisitorAction::class, 'store']); 
-        Route::post('update/{id}', [VisitorAction::class, 'update']);
-        Route::get('delete/{id}', [VisitorAction::class, 'delete']);
+        Route::get('/', [VisitorAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [VisitorAction::class, 'store'])->middleware('permission:visitor-create'); 
+        Route::post('update/{id}', [VisitorAction::class, 'update'])->middleware('permission:visitor-edit');
+        Route::get('delete/{id}', [VisitorAction::class, 'delete'])->middleware('permission:visitor-delete');
     });
     Route::prefix('client-type')->group(function () {
         Route::get('/', [ClientTypeAction::class, 'index']);
@@ -191,5 +193,14 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('update/{id}', [ToDoListAction::class, 'update']);
         Route::get('show/{id}', [ToDoListAction::class, 'show']);
         Route::get('delete/{id}', [ToDoListAction::class, 'delete']);
+    });
+    //39660
+    Route::prefix('access-control')->group(function () {
+        Route::get('/role-list', [PermissionAction::class, 'index'])->middleware('permission:role.list');
+        Route::get('/permission-list', [PermissionAction::class, 'permission']);
+        Route::post('store', [PermissionAction::class, 'store']); 
+        Route::get('show/{id}', [PermissionAction::class, 'show']);
+        Route::post('update/{id}', [PermissionAction::class, 'update']);
+        Route::get('delete/{id}', [PermissionAction::class, 'delete']);
     });
 });

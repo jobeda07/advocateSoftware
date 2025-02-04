@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\CourtCase;
-use App\Models\Hearing;
+use DateTime;
+use Exception;
 use App\Models\User;
+use App\Models\Hearing;
+use App\Models\CourtCase;
 use App\Models\CaseSection;
+use App\Traits\ImageUpload;
 use App\Models\CaseDocument;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
-use Exception;
-use Auth;
-use DateTime;
 use App\Http\Requests\CourtCaseRequest;
-use App\Traits\ImageUpload;
 use App\Http\Resources\CourtCaseResource;
 
 class CasesAction extends Controller

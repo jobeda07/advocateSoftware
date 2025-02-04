@@ -2,39 +2,26 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Exception;
 use App\Models\User;
+use App\Traits\ImageUpload;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Exception;
-use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\ImageUpload;
+use App\Http\Resources\EmployeeResource;
 
 class EmployeeAction extends Controller
 {  
     use ImageUpload;
     public function index(){
         try {
-            $employee = User::where('id','!=',1)->orderBy('id','desc')->get();
-            $employeeData = [];
+            $employeeData = User::where('id','!=',1)->orderBy('id','desc')->get();
 
-            foreach ($employee as $item) {
-                $employeeData[] = [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'phone' => $item->phone,
-                    'email' => $item->email ?? '',
-                    'join_date' => $item->join_date,
-                    'status' => $item->status == 1 ? 'active' : 'inactive',
-                    'designation' => $item->designation,
-                    'address' => $item->address,
-                    'image' =>$item->image ? env('APP_URL') . "/" .$item->image : '',
-                ];
-            }
             return response()->json([
-                'employee' =>$employeeData,
+                'employee' =>EmployeeResource::collection($employeeData),
                  'status'=>200
             ]);
         } catch (\Exception $e) {
@@ -74,9 +61,12 @@ class EmployeeAction extends Controller
                 'designation' => $request->designation,
                 'address' => $request->address,
             ]);
+            if ($request->roles) {
+                $employeeData->assignRole($request->roles);
+            }
             DB::commit();
             return response([
-                'employee-data'=> $employeeData,
+                'employee-data'=> new  EmployeeResource($employeeData),
                 'message' => 'Data Created successfully'
             ]);
         // } catch (\Exception $e) {
@@ -98,7 +88,7 @@ class EmployeeAction extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
         DB::beginTransaction();
-        try{
+        // try{
 
             $employeeData=User::find($id);
             if(! $employeeData){
@@ -126,18 +116,21 @@ class EmployeeAction extends Controller
                 'designation' => $request->designation,
                 'address' => $request->address,
             ]);
+            if ($request->roles) {
+                $employeeData->syncRoles($request->roles);
+            }
             DB::commit();
             return response([
-                'employee-data'=> $employeeData,
+                'employee-data'=> new  EmployeeResource($employeeData),
                 'message' => 'Data Update successfully'
             ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'error' =>'Somethink went wrong',
-                 'status'=>500
-            ]);
-        }
+        // } catch (\Exception $e) {
+        //     DB::rollback();
+        //     return response()->json([
+        //         'error' =>'Somethink went wrong',
+        //          'status'=>500
+        //     ]);
+        // }
     } 
 
     public function delete($id){

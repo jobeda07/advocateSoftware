@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Exception;
 use App\Models\Visitor;
-use App\Http\Requests\VisitorRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\VisitorRequest;
 use App\Http\Resources\VisitorResource;
-use Exception;
 
 
 class VisitorAction extends Controller
 {  
+
+
+
     public function index(){
         try {    
             $visitor = Visitor::orderBy('id','desc')->get();
@@ -52,7 +56,7 @@ class VisitorAction extends Controller
                 'fees'=>$request->fees,
                 'reference'=>$request->reference,
                 'remark'=>$request->remark,
-                'created_by'=>auth()->user()->id,
+                'created_by'=> Auth::user()->id,
             ]);
             DB::commit();
             return response([

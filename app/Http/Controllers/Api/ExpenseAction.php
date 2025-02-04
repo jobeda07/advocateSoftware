@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Expense;
 use Exception;
+use App\Models\Expense;
 use App\Traits\ImageUpload;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\ExpenseRequest;
 use App\Http\Resources\ExpenseResource;
@@ -51,7 +52,7 @@ class ExpenseAction extends Controller
                 'amount' => $request->amount,
                 'payment_method' => $request->payment_method,
                 'comment' => $request->comment,
-                'created_by' => auth()->user()->id,
+                'created_by' => Auth::user()->id,
             ]);
             if (isset($request->voucher_image)) {
                 $file = $request->voucher_image;

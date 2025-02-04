@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Exception;
 use App\Models\Client;
 use App\Models\CourtCase;
 use App\Models\CaseSection;
+use App\Traits\ImageUpload;
 use App\Models\CaseDocument;
-use App\Http\Resources\ClientResource;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ClientRequest;
-use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Resources\ClientResource;
 
 class ClientAction extends Controller
 {  
+    use ImageUpload;
     public function index(){
         try {
             $client = Client::orderBy('id','desc')->get();
@@ -79,7 +83,7 @@ class ClientAction extends Controller
                 'thana_id' => $request->thana_id,
                 'address' => $request->address,
                 'reference' => $request->reference,
-                'created_by'=>auth()->user()->id,
+                'created_by'=> Auth::user()->id,
             ]);
             DB::commit();
             return response([

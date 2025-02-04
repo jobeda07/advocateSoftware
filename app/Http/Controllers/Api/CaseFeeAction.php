@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\CaseFee;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\CaseFeeRequest;
 use App\Http\Resources\CaseFeeResource;
@@ -48,7 +49,7 @@ class CaseFeeAction extends Controller
                 'amount' => $request->amount,
                 'payment_type' => $request->payment_type,
                 'comment' => $request->comment,
-                'created_by' => auth()->user()->id,
+                'created_by' => Auth::user()->id,
             ]);
     
             DB::commit();

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\ToDoListResource;
 use App\Models\ToDoList;
 use Illuminate\Http\Request;
-use App\Http\Requests\ToDoListRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\ToDoListRequest;
+use App\Http\Resources\ToDoListResource;
 
 class ToDoListAction extends Controller
 {
@@ -46,7 +47,7 @@ class ToDoListAction extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('ToDo List Store Error: ' . $e->getMessage());
+            Log::error('ToDo List Store Error: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Something went wrong: ' . $e->getMessage(),
                 'status' => 500,

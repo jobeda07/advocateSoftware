@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\CaseTask;
 use App\Models\TaskProgress;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\CaseTaskRequest;
 use App\Http\Resources\CaseTaskResource;
@@ -41,7 +42,7 @@ class CaseTaskAction extends Controller
                 'title' => $request->title,
                 'details' => $request->details,
                 'assign_to' => $request->assign_to,
-                'created_by' => auth()->user()->id,
+                'created_by' =>  Auth::user()->id,
             ]);
     
             DB::commit();
@@ -154,7 +155,7 @@ class CaseTaskAction extends Controller
                 'case_task_id' => $caseTask->id,
                 'progress' => $request->progress,
                 'remarks' => $request->remarks,
-                'created_by' => auth()->user()->id,
+                'created_by' =>  Auth::user()->id,
             ]);
     
             DB::commit();

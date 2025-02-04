@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Exception;
 use App\Models\Hearing;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\HearingRequest;
 use App\Http\Resources\HearingResource;
-use Exception;
 
 class HearingAction extends Controller
 {  
@@ -38,7 +39,7 @@ class HearingAction extends Controller
                 'date_time' => $request->date_time,
                 'court_branch' => $request->court_branch,
                 'comment' => $request->comment,
-                'created_by' => auth()->user()->id,
+                'created_by' =>  Auth::user()->id,
             ]);
     
             DB::commit();
