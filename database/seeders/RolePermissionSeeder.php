@@ -147,10 +147,10 @@ class RolePermissionSeeder extends Seeder
                 'module_name' => 'Employee',
                 'guard_name' => 'web',
                 'permissions' => [
-                    'employee.list',
-                    'employee.add',
-                    'employee.edit',
-                    'employee.delete',
+                    'employee-list',
+                    'employee-add',
+                    'employee-edit',
+                    'employee-delete',
                 ]
             ],
             [
