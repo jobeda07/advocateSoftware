@@ -18,7 +18,7 @@ class CustomPermissionMiddleware
     {
         if (!Auth::user() || !Auth::user()->can($permission)) {
             return response()->json([
-                'message' => 'User does not have the right permissions.',
+                'message' => 'Access denied. You do not have the necessary permissions to proceed.'
             ], 403);
         }
 

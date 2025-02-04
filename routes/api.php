@@ -48,34 +48,34 @@ Route::get('testimonial-section/list', [TestimonialAction::class, 'index']);
  // *****  admin    ********   //
 Route::middleware('auth:sanctum')->group(function (){
     Route::prefix('court-list')->group(function () {
-        Route::get('/', [CourtListAction::class, 'index']);
-        Route::post('store', [CourtListAction::class, 'store']); 
-        Route::post('update/{id}', [CourtListAction::class, 'update']);
-        Route::get('delete/{id}', [CourtListAction::class, 'delete']);
+        Route::get('/', [CourtListAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CourtListAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CourtListAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CourtListAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('case-category')->group(function () {
-        Route::get('/', [CaseCategoryAction::class, 'index']);
-        Route::post('store', [CaseCategoryAction::class, 'store']); 
-        Route::post('update/{id}', [CaseCategoryAction::class, 'update']);
-        Route::get('delete/{id}', [CaseCategoryAction::class, 'delete']);
+        Route::get('/', [CaseCategoryAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseCategoryAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseCategoryAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseCategoryAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('case-section')->group(function () {
-        Route::get('/', [CaseSectionAction::class, 'index']);
-        Route::post('store', [CaseSectionAction::class, 'store']); 
-        Route::post('update/{id}', [CaseSectionAction::class, 'update']);
-        Route::get('delete/{id}', [CaseSectionAction::class, 'delete']);
+        Route::get('/', [CaseSectionAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseSectionAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseSectionAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseSectionAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('case-type')->group(function () {
-        Route::get('/', [CaseTypeAction::class, 'index']);
-        Route::post('store', [CaseTypeAction::class, 'store']); 
-        Route::post('update/{id}', [CaseTypeAction::class, 'update']);
-        Route::get('delete/{id}', [CaseTypeAction::class, 'delete']);
+        Route::get('/', [CaseTypeAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseTypeAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseTypeAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseTypeAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('case-stage')->group(function () {
-        Route::get('/', [CaseStageAction::class, 'index']);
-        Route::post('store', [CaseStageAction::class, 'store']); 
-        Route::post('update/{id}', [CaseStageAction::class, 'update']);
-        Route::get('delete/{id}', [CaseStageAction::class, 'delete']);
+        Route::get('/', [CaseStageAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseStageAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseStageAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseStageAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('visitor')->group(function () {
         Route::get('/', [VisitorAction::class, 'index'])->middleware('permission:visitor-list');
@@ -84,17 +84,17 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('delete/{id}', [VisitorAction::class, 'delete'])->middleware('permission:visitor-delete');
     });
     Route::prefix('client-type')->group(function () {
-        Route::get('/', [ClientTypeAction::class, 'index']);
-        Route::post('store', [ClientTypeAction::class, 'store']); 
-        Route::post('update/{id}', [ClientTypeAction::class, 'update']);
-        Route::get('delete/{id}', [ClientTypeAction::class, 'delete']);
+        Route::get('/', [ClientTypeAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [ClientTypeAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [ClientTypeAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [ClientTypeAction::class, 'delete'])->middleware('permission:visitor-list');
     }); 
     Route::prefix('client')->group(function () {
-        Route::get('/', [ClientAction::class, 'index']);
-        Route::post('store', [ClientAction::class, 'store']); 
-        Route::post('update/{id}', [ClientAction::class, 'update']);
-        Route::get('delete/{id}', [ClientAction::class, 'delete']);
-        Route::get('show/{id}', [ClientAction::class, 'show']);
+        Route::get('/', [ClientAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [ClientAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [ClientAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [ClientAction::class, 'delete'])->middleware('permission:visitor-list');
+        Route::get('show/{id}', [ClientAction::class, 'show'])->middleware('permission:visitor-list');
     }); 
     Route::prefix('division')->group(function () {
         Route::get('/', [AddressAction::class, 'division']);
@@ -106,101 +106,101 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('/{id}', [AddressAction::class, 'thana']);
     });
     Route::prefix('cases')->group(function () {
-        Route::get('/', [CasesAction::class, 'index']);
-        Route::get('/all-list', [CasesAction::class, 'all_list']);
-        Route::post('store', [CasesAction::class, 'store']); 
-        Route::post('update/{id}', [CasesAction::class, 'update']);
-        Route::get('delete/{id}', [CasesAction::class, 'delete']);
-        Route::get('show/{id}', [CasesAction::class, 'show']);
-        Route::get('delete/case-document/{id}', [CasesAction::class, 'case_document_delete']);
-        Route::post('lower/store/{id}', [CasesAction::class, 'case_lower_store']);
+        Route::get('/', [CasesAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::get('/all-list', [CasesAction::class, 'all_list'])->middleware('permission:visitor-list');
+        Route::post('store', [CasesAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CasesAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CasesAction::class, 'delete'])->middleware('permission:visitor-list');
+        Route::get('show/{id}', [CasesAction::class, 'show'])->middleware('permission:visitor-list');
+        Route::get('delete/case-document/{id}', [CasesAction::class, 'case_document_delete'])->middleware('permission:visitor-list');
+        Route::post('lower/store/{id}', [CasesAction::class, 'case_lower_store'])->middleware('permission:visitor-list');
     }); 
     Route::prefix('employee')->group(function () {
-        Route::get('/', [EmployeeAction::class, 'index']);
-        Route::post('store', [EmployeeAction::class, 'store']); 
-        Route::post('update/{id}', [EmployeeAction::class, 'update']);
-        Route::get('delete/{id}', [EmployeeAction::class, 'delete']);
+        Route::get('/', [EmployeeAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [EmployeeAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [EmployeeAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [EmployeeAction::class, 'delete'])->middleware('permission:visitor-list');
     }); 
 
     Route::prefix('hearing')->group(function () {
-        Route::get('/', [HearingAction::class, 'index']);
-        Route::post('store', [HearingAction::class, 'store']); 
-        Route::post('update/{id}', [HearingAction::class, 'update']);
-        Route::get('delete/{id}', [HearingAction::class, 'delete']);
+        Route::get('/', [HearingAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [HearingAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [HearingAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [HearingAction::class, 'delete'])->middleware('permission:visitor-list');
     }); 
 
     Route::prefix('case-fees')->group(function () {
-        Route::get('/', [CaseFeeAction::class, 'index']);
-        Route::post('store', [CaseFeeAction::class, 'store']); 
-        Route::post('update/{id}', [CaseFeeAction::class, 'update']);
-        Route::get('delete/{id}', [CaseFeeAction::class, 'delete']);
+        Route::get('/', [CaseFeeAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseFeeAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseFeeAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseFeeAction::class, 'delete'])->middleware('permission:visitor-list');
     }); 
     Route::prefix('extra-case-fees')->group(function () {
-        Route::get('/', [CaseExtraFeeAction::class, 'index']);
-        Route::post('store', [CaseExtraFeeAction::class, 'store']); 
-        Route::post('update/{id}', [CaseExtraFeeAction::class, 'update']);
-        Route::get('delete/{id}', [CaseExtraFeeAction::class, 'delete']);
+        Route::get('/', [CaseExtraFeeAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseExtraFeeAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseExtraFeeAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseExtraFeeAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('expense-category')->group(function () {
-        Route::get('/', [ExpenseCategoryAction::class, 'index']);
-        Route::post('store', [ExpenseCategoryAction::class, 'store']); 
-        Route::post('update/{id}', [ExpenseCategoryAction::class, 'update']);
-        Route::get('delete/{id}', [ExpenseCategoryAction::class, 'delete']);
+        Route::get('/', [ExpenseCategoryAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [ExpenseCategoryAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [ExpenseCategoryAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [ExpenseCategoryAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     Route::prefix('expense')->group(function () {
-        Route::get('/', [ExpenseAction::class, 'index']);
-        Route::post('store', [ExpenseAction::class, 'store']); 
-        Route::post('update/{id}', [ExpenseAction::class, 'update']);
-        Route::get('delete/{id}', [ExpenseAction::class, 'delete']);
+        Route::get('/', [ExpenseAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [ExpenseAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [ExpenseAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [ExpenseAction::class, 'delete'])->middleware('permission:visitor-list');
     }); 
     Route::prefix('case-task')->group(function () {
-        Route::get('/', [CaseTaskAction::class, 'index']);
-        Route::post('store', [CaseTaskAction::class, 'store']); 
-        Route::post('update/{id}', [CaseTaskAction::class, 'update']);
-        Route::get('delete/{id}', [CaseTaskAction::class, 'delete']);
-        Route::get('progress-list/{id}', [CaseTaskAction::class, 'progress_list']);
-        Route::post('progress-store/{id}', [CaseTaskAction::class, 'progress_store']);
+        Route::get('/', [CaseTaskAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [CaseTaskAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::post('update/{id}', [CaseTaskAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [CaseTaskAction::class, 'delete'])->middleware('permission:visitor-list');
+        Route::get('progress-list/{id}', [CaseTaskAction::class, 'progress_list'])->middleware('permission:visitor-list');
+        Route::post('progress-store/{id}', [CaseTaskAction::class, 'progress_store'])->middleware('permission:visitor-list');
     }); 
     Route::prefix('home-section')->group(function () {
-        Route::post('update', [HomeAction::class, 'update']);
+        Route::post('update', [HomeAction::class, 'update'])->middleware('permission:visitor-list');
     });
 
     Route::prefix('about-section')->group(function () {
-        Route::post('update', [AboutAction::class, 'update']);
+        Route::post('update', [AboutAction::class, 'update'])->middleware('permission:visitor-list');
     });
 
     Route::prefix('services')->group(function () {
-        Route::get('/', [ServiceAction::class, 'index']);
-        Route::post('store', [ServiceAction::class, 'store']);
-        Route::post('update/{id}', [ServiceAction::class, 'update']);
-        Route::get('delete/{id}', [ServiceAction::class, 'delete']);
+        Route::get('/', [ServiceAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [ServiceAction::class, 'store'])->middleware('permission:visitor-list');
+        Route::post('update/{id}', [ServiceAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [ServiceAction::class, 'delete'])->middleware('permission:visitor-list');
     });
 
     Route::prefix('testimonials')->group(function () {
-        Route::get('/', [TestimonialAction::class, 'index']);
-        Route::post('store', [TestimonialAction::class, 'store']);
-        Route::post('update/{id}', [TestimonialAction::class, 'update']);
-        Route::get('delete/{id}', [TestimonialAction::class, 'delete']);
+        Route::get('/', [TestimonialAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [TestimonialAction::class, 'store'])->middleware('permission:visitor-list');
+        Route::post('update/{id}', [TestimonialAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [TestimonialAction::class, 'delete'])->middleware('permission:visitor-list');
     });
 
     Route::prefix('contact-section')->group(function () {
-        Route::post('update', [ContactAction::class, 'update']);
+        Route::post('update', [ContactAction::class, 'update'])->middleware('permission:visitor-list');
     });
 
     Route::prefix('todo-lists')->group(function () {
-        Route::get('/', [ToDoListAction::class, 'index']);
-        Route::post('store', [ToDoListAction::class, 'store']);
-        Route::post('update/{id}', [ToDoListAction::class, 'update']);
-        Route::get('show/{id}', [ToDoListAction::class, 'show']);
-        Route::get('delete/{id}', [ToDoListAction::class, 'delete']);
+        Route::get('/', [ToDoListAction::class, 'index'])->middleware('permission:visitor-list');
+        Route::post('store', [ToDoListAction::class, 'store'])->middleware('permission:visitor-list');
+        Route::post('update/{id}', [ToDoListAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('show/{id}', [ToDoListAction::class, 'show'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [ToDoListAction::class, 'delete'])->middleware('permission:visitor-list');
     });
     //39660
     Route::prefix('access-control')->group(function () {
         Route::get('/role-list', [PermissionAction::class, 'index'])->middleware('permission:role.list');
-        Route::get('/permission-list', [PermissionAction::class, 'permission']);
-        Route::post('store', [PermissionAction::class, 'store']); 
-        Route::get('show/{id}', [PermissionAction::class, 'show']);
-        Route::post('update/{id}', [PermissionAction::class, 'update']);
-        Route::get('delete/{id}', [PermissionAction::class, 'delete']);
+        Route::get('/permission-list', [PermissionAction::class, 'permission'])->middleware('permission:visitor-list');
+        Route::post('store', [PermissionAction::class, 'store'])->middleware('permission:visitor-list'); 
+        Route::get('show/{id}', [PermissionAction::class, 'show'])->middleware('permission:visitor-list');
+        Route::post('update/{id}', [PermissionAction::class, 'update'])->middleware('permission:visitor-list');
+        Route::get('delete/{id}', [PermissionAction::class, 'delete'])->middleware('permission:visitor-list');
     });
 });
