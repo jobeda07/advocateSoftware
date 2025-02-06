@@ -18,50 +18,48 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\CourtCaseRequest;
 use App\Http\Resources\CourtCaseResource;
+use App\Http\Resources\IndexCourtCaseResource;
 
 class CasesAction extends Controller
 {  
     use ImageUpload;
-    public function index(){
-       try {
-            $case = CourtCase::orderBy('id','desc')->get();
-            $caseData = [];
-            foreach ($case as $item) {
-                $caseSec=explode(',',$item->case_section);
-                $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
-                $hearing=Hearing::where('caseId',$item->caseId)->latest()->first();
-                $caselawers = explode(',', $item->case_lower_id );
-                $lawer = User::whereIn('id', $caselawers)->get();
-                $caseData[] = [
-                    //'id' => $item->id,
-                    'caseId' => $item->caseId,
-                    'clientId' => $item->clientId ?? '',
-                    'client_name' => $item->clientAdd->name ?? '',
-                    'client_phone' => $item->clientAdd->phone ?? '',
-                    'case_section' => $caseSections->toArray(),
-                    'case_category' => $item->caseCategory->name,
-                    'priority' => $item->priority,
-                    'case_type' => $item->caseType->name ?? '',
-                    'case_stage' => $item->caseStage->name ?? '',
-                    'client_type' => $item->clientType->name ?? '',
-                    'court' => $item->courtAdd->name ?? '',
-                    'next_hearing' => isset($hearing->date_time) ? (new DateTime($hearing->date_time))->format('j F Y g.i A') : '',
-                    'case_lower' => $item->caseLower->name ?? '',
-                    'case_lower' => $lawer->pluck('name')->implode(', '),
-                    'create_date_time' => $item->created_at->format('j F Y  g.i A'),
-                ];
+   
+    public function index(Request $request)
+    {
+        try {
+            $search = $request->query('search');
+            $query = CourtCase::orderByDesc('id');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("caseId", "like", "%{$search}%")
+                    ->orWhere("priority", "like", "%{$search}%")
+                    ->orWhere("clientId", "like", "%{$search}%")
+                    ->orWhereHas('clientAdd', function ($query) use ($search) {
+                        $query->where("name", "like", "%{$search}%")
+                            ->orWhere("phone", "like", "%{$search}%")
+                            ->orWhere("email", "like", "%{$search}%");
+                    });
+                });
             }
-            return response()->json([
-                'case' =>$caseData,
-                 'status'=>200
-            ]);
+
+            $cases = $query->paginate(1)->appends($request->query());
+
+            if ($cases->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+
+            return IndexCourtCaseResource::collection($cases)
+                ->additional(['status' => 200]);
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
-                 'status'=>500
+                'error' => 'Data not found',
+                'status' => 500
             ]);
         }
     }
+    
      public function all_list(){
        try {
             $case = CourtCase::orderBy('id','desc')->get();
@@ -332,10 +330,10 @@ class CasesAction extends Controller
         }
     }
 
-    public function case_lower_store(Request $request,$caseId){
+    public function case_lawer_store(Request $request,$caseId){
         DB::beginTransaction();
         $request->validate([
-            'case_lower_id' => 'required|exists:users,id',
+            'case_lawer_id' => 'required|exists:users,id',
         ]);
         try{
             $case=CourtCase::where('caseId',$caseId)->first();
@@ -344,7 +342,7 @@ class CasesAction extends Controller
                     'message' => 'Case Id Not found'
                 ]); 
             }
-            $case->case_lower_id=$request->case_lower_id;
+            $case->case_lawer_id=$request->case_lawer_id;
             $case->save();
             DB::commit();
             return response([

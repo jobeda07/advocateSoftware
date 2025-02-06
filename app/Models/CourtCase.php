@@ -35,8 +35,8 @@ class CourtCase extends Model
     public function caseCategory(){
         return $this->belongsTo(CaseCategory::class,'case_category');
     }
-    public function caseLower(){
-        return $this->belongsTo(User::class,'case_lower_id');
+    public function caselawer(){
+        return $this->belongsTo(User::class,'case_lawer_id');
     }
     public function createdBy(){
         return $this->belongsTo(User::class,'created_by');

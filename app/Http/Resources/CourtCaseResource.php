@@ -19,7 +19,7 @@ class CourtCaseResource extends JsonResource
     public function toArray(Request $request): array
     {
         $caseSec = explode(',', $this->case_section);
-        $caselawers = explode(',', $this->case_lower_id );
+        $caselawers = explode(',', $this->case_lawer_id );
         $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
         $lawer = User::whereIn('id', $caselawers)->get();
         $hearing=Hearing::where('caseId',$this->caseId)->latest()->first();
@@ -47,7 +47,7 @@ class CourtCaseResource extends JsonResource
             'comments' => $this->comments ?? 'N/A',
             'witnesses' =>$this->witnesses ?? 'N/A',
             'created_by' =>$this->createdBy->name ?? 'N/A',
-            'case_lower' => $lawer->map(function ($user){
+            'case_lawer' => $lawer->map(function ($user){
                 return[
                    'id'=>$user->id,
                    'name'=>$user->name,

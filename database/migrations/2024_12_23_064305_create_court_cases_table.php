@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('opposition_phone')->nullable();
             $table->enum('priority', ['High','Medium','Low']);
             $table->enum('status', ['active','inactive']);
-            $table->bigInteger('case_lower_id')->nullable();
+            $table->bigInteger('case_lawer_id')->nullable();
             $table->longtext('comments');
             $table->bigInteger('created_by');
             $table->timestamps();

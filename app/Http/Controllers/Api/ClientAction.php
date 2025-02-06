@@ -16,47 +16,44 @@ use App\Http\Requests\ClientRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Resources\ClientResource;
+use App\Http\Resources\IndexClientResource;
 
 class ClientAction extends Controller
 {  
     use ImageUpload;
-    public function index(){
+    
+    public function index(Request $request)
+    {
         try {
-            $client = Client::orderBy('id','desc')->get();
-            $clientData = [];
+            $search = $request->query('search');
+            $query = Client::orderByDesc('id');
 
-            foreach ($client as $item) {
-                $cases=CourtCase::where('clientId',$item->clientId)->count();
-                $clientData[] = [
-                    'id' => $item->id,
-                    'clientId' => $item->clientId ?? '',
-                    'name' => $item->name ?? '',
-                    'phone' => $item->phone ?? '',
-                    'email' => $item->email ?? '',
-                    'fathers_name' => $item->fathers_name ?? '',
-                    'alternative_phone' => $item->alternative_phone ?? '',
-                    'profession' => $item->profession ?? '',
-                    'division_id' => $item->division_id?? '',
-                    'district_id' => $item->district_id ?? '',
-                    'thana_id' => $item->thana_id ?? '',
-                    'address' => $item->address ?? '',
-                    'reference' => $item->reference ?? '',
-                    'cases' => $cases ?? '',
-                    'created_by' => $item->createdBy->name ?? '',
-                    'create_date_time' => $item->created_at->format('j F Y  g.i A'),
-                ];
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("name", "like", "%{$search}%")
+                    ->orWhere("phone", "like", "%{$search}%")
+                    ->orWhere("clientId", "like", "%{$search}%");
+                });
             }
-            return response()->json([
-                'client' =>$clientData,
-                 'status'=>200
-            ]);
+
+            $clients = $query->paginate(1)->appends($request->query());
+
+            if ($clients->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+
+            return IndexClientResource::collection($clients)
+                ->additional(['status' => 200]);
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
-                 'status'=>500
+                'error' => 'Data not found',
+                'status' => 500
             ]);
         }
     }
+
+    
     public function store(ClientRequest $request){
         DB::beginTransaction();
         try{

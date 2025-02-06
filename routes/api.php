@@ -114,7 +114,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::get('delete/{id}', [CasesAction::class, 'delete'])->middleware('permission:case-delete');
         Route::get('show/{id}', [CasesAction::class, 'show'])->middleware('permission:case-show');
         Route::get('delete/case-document/{id}', [CasesAction::class, 'case_document_delete'])->middleware('permission:case-edit');
-        Route::post('lower/store/{id}', [CasesAction::class, 'case_lower_store'])->middleware('permission:case-edit');
+        Route::post('lawer/store/{id}', [CasesAction::class, 'case_lawer_store'])->middleware('permission:case-edit');
     }); 
     Route::prefix('employee')->group(function () {
         Route::get('/', [EmployeeAction::class, 'index'])->middleware('permission:employee-list');

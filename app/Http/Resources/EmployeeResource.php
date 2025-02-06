@@ -23,6 +23,7 @@ class EmployeeResource extends JsonResource
             'status' => $this->status == 1 ? 'active' : 'inactive',
             'portfolio_status' => $this->portfolio_status,
             'designation' => $this->designation,
+            'expertise_in' => $this->expertise_in,
             'address' => $this->address,
             'image' =>$this->image ? $this->image : '',
             'role_name'=>$this->getRoleNames()->join(', ')
