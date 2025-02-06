@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\EmployeeResource;
 
 class EmployeeAction extends Controller
@@ -32,20 +33,10 @@ class EmployeeAction extends Controller
         }
     }
     
-    public function store(Request $request){
-        $request->validate([
-            'name' => 'required|string|max:150',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11','unique:users,phone'],
-            'email'=>'nullable|email|unique:users,email',
-            'join_date' => 'required',
-            'designation' => 'required|string|max:150',
-            'address' => 'required|string|max:180',
-            'expertise_in' => 'required|string|max:100',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'roles' => 'required',
-        ]);
+    public function store(EmployeeRequest $request){
+
         DB::beginTransaction();
-        try{
+       try{
             $image='';
             if (isset($request->image)) {
                 $file = $request->image;
@@ -92,6 +83,7 @@ class EmployeeAction extends Controller
             'address' => 'required|string|max:180',
             'expertise_in' => 'required|string|max:100',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'roles' => 'required|exists:roles,name',
         ]);
         DB::beginTransaction();
         try{
