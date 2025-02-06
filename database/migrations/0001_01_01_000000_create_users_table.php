@@ -18,10 +18,12 @@ return new class extends Migration
             $table->string('phone')->unique();
             $table->date('join_date')->nullable();
             $table->integer('status')->default(1);
+            $table->integer('portfolio_status')->default(1);
             $table->string('image')->nullable();
             $table->string('designation')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('expertise_in')->nullable();
             $table->string('address')->nullable();
             $table->rememberToken();
             $table->timestamps();

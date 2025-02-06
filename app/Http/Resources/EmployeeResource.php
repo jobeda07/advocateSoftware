@@ -21,6 +21,7 @@ class EmployeeResource extends JsonResource
             'email' => $this->email ?? '',
             'join_date' => $this->join_date,
             'status' => $this->status == 1 ? 'active' : 'inactive',
+            'portfolio_status' => $this->portfolio_status,
             'designation' => $this->designation,
             'address' => $this->address,
             'image' =>$this->image ? $this->image : '',

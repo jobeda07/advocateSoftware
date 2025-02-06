@@ -44,6 +44,7 @@ Route::get('about-section/show', [AboutAction::class, 'show']);
 Route::get('contact-section/show', [ContactAction::class, 'show']);
 Route::get('services-section/list', [ServiceAction::class, 'index']);
 Route::get('testimonial-section/list', [TestimonialAction::class, 'index']);
+Route::get('team-section/list', [EmployeeAction::class, 'teamlist']);
 
  // *****  admin    ********   //
 Route::middleware('auth:sanctum')->group(function (){
@@ -120,6 +121,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [EmployeeAction::class, 'store'])->middleware('permission:employee-create'); 
         Route::post('update/{id}', [EmployeeAction::class, 'update'])->middleware('permission:employee-edit');
         Route::get('delete/{id}', [EmployeeAction::class, 'delete'])->middleware('permission:employee-delete');
+        Route::get('portfolio/status/{id}', [EmployeeAction::class, 'portfolio_status'])->middleware('permission:employee-edit');
     }); 
 
     Route::prefix('hearing')->group(function () {
@@ -201,7 +203,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::prefix('access-control')->group(function () {
         Route::get('/role-list', [PermissionAction::class, 'index'])->middleware('permission:role.list');
         Route::get('/permission-list', [PermissionAction::class, 'permission'])->middleware('permission:visitor-list');
-        Route::post('store', [PermissionAction::class, 'store'])->middleware('permission:role.add'); 
+        Route::post('store', [PermissionAction::class, 'store'])->middleware('permission:role.create'); 
         Route::get('show/{id}', [PermissionAction::class, 'show']);
         Route::post('update/{id}', [PermissionAction::class, 'update'])->middleware('permission:role.edit');
         Route::get('delete/{id}', [PermissionAction::class, 'delete'])->middleware('permission:role.delete');

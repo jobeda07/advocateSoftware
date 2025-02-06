@@ -31,6 +31,7 @@ class EmployeeAction extends Controller
             ]);
         }
     }
+    
     public function store(Request $request){
         $request->validate([
             'name' => 'required|string|max:150',
@@ -39,10 +40,12 @@ class EmployeeAction extends Controller
             'join_date' => 'required',
             'designation' => 'required|string|max:150',
             'address' => 'required|string|max:180',
+            'expertise_in' => 'required|string|max:100',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'roles' => 'required',
         ]);
         DB::beginTransaction();
-        // try{
+        try{
             $image='';
             if (isset($request->image)) {
                 $file = $request->image;
@@ -56,9 +59,11 @@ class EmployeeAction extends Controller
                 'email' => $request->email ?? '',
                 'join_date' => $request->join_date,
                 'status' => 1,
+                'portfolio_status' => 0,
                 'password' => Hash::make('12345678'),
                 'image' => $image,
                 'designation' => $request->designation,
+                'expertise_in' => $request->expertise_in,
                 'address' => $request->address,
             ]);
             if ($request->roles) {
@@ -69,13 +74,13 @@ class EmployeeAction extends Controller
                 'employee-data'=> new  EmployeeResource($employeeData),
                 'message' => 'Data Created successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
     public function update(Request $request,$id){
         $request->validate([
@@ -85,10 +90,11 @@ class EmployeeAction extends Controller
             'join_date' => 'required',
             'designation' => 'required|string|max:150',
             'address' => 'required|string|max:180',
+            'expertise_in' => 'required|string|max:100',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
         DB::beginTransaction();
-        // try{
+        try{
 
             $employeeData=User::find($id);
             if(! $employeeData){
@@ -111,9 +117,11 @@ class EmployeeAction extends Controller
                 'email' => $request->email ?? '',
                 'join_date' => $request->join_date,
                 'status' =>$employeeData->status,
+                'portfolio_status' =>$employeeData->portfolio_status,
                 'password' => $request->password ?? $employeeData->password,
                 'image' => $image,
                 'designation' => $request->designation,
+                'expertise_in' => $request->expertise_in,
                 'address' => $request->address,
             ]);
             if ($request->roles) {
@@ -124,13 +132,13 @@ class EmployeeAction extends Controller
                 'employee-data'=> new  EmployeeResource($employeeData),
                 'message' => 'Data Update successfully'
             ]);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' =>'Somethink went wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink went wrong',
+                 'status'=>500
+            ]);
+        }
     } 
 
     public function delete($id){
@@ -153,6 +161,46 @@ class EmployeeAction extends Controller
             DB::rollback();
             return response()->json([
                 'error' =>'Somethink Went Wrong',
+                 'status'=>500
+            ]);
+        }
+    }
+    public function portfolio_status($id){
+        DB::beginTransaction();
+        try{
+            $employeeData=User::find($id);
+            if(! $employeeData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
+            $employeeData->portfolio_status=$employeeData->portfolio_status == 1 ? 0 : 1;;
+            $employeeData->save();
+            DB::commit();
+            return response([
+                'message' => ' Status Change successfully'
+            ]);
+        }catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink Went Wrong',
+                 'status'=>500
+            ]);
+        }
+    }
+
+    public function teamlist(){
+        try {
+            $employeeData = User::where('id','!=',1)->where('portfolio_status',1)->orderBy('id','desc')->get();
+
+            return response()->json([
+                'employee' =>EmployeeResource::collection($employeeData),
+                 'status'=>200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' =>'data not found',
                  'status'=>500
             ]);
         }
