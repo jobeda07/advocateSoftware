@@ -36,7 +36,7 @@ class ClientAction extends Controller
                 });
             }
 
-            $clients = $query->paginate(1)->appends($request->query());
+            $clients = $query->paginate(2)->appends($request->query());
 
             if ($clients->isEmpty()) {
                 return response()->json(['data' => []], 404);

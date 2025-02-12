@@ -161,6 +161,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('store', [CaseTaskAction::class, 'store'])->middleware('permission:caseTask-create'); 
         Route::post('update/{id}', [CaseTaskAction::class, 'update'])->middleware('permission:caseTask-edit');
         Route::get('delete/{id}', [CaseTaskAction::class, 'delete'])->middleware('permission:caseTask-delete');
+        Route::get('show/{id}', [CaseTaskAction::class, 'show'])->middleware('permission:caseTask-show');
         Route::get('progress-list/{id}', [CaseTaskAction::class, 'progress_list'])->middleware('permission:caseTask-show');
         Route::post('progress-store/{id}', [CaseTaskAction::class, 'progress_store'])->middleware('permission:caseTask-addProgress');
     }); 

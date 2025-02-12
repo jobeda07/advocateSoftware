@@ -12,6 +12,6 @@ class CaseTask extends Model
         return $this->belongsTo(User::class,'created_by');
     }
     public function caseOf(){
-        return $this->belongsTo(CourtCase::class,'caseId');
+        return $this->belongsTo(CourtCase::class,'caseId','caseId');
     }
 }

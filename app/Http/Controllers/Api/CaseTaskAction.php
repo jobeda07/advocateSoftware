@@ -118,6 +118,40 @@ class CaseTaskAction extends Controller
                  'status'=>500
             ]);
         }
+    }
+    public function show($id){
+        // try{
+            $caseTaskData=CaseTask::find($id);
+            $caseTask=[
+            'caseId'=>$caseTaskData->caseId,
+            'title'=>$caseTaskData->title,
+            'details'=>$caseTaskData->details,
+            'client_name'=>$caseTaskData->caseOf->clientAdd->name ?? '',
+            'client_phone'=>$caseTaskData->caseOf->clientAdd->phone ?? '',
+            'client_type'=>$caseTaskData->caseOf->caseType->name ?? '',
+            'case_type'=>$caseTaskData->caseOf->caseType->name ?? '',
+            'case_stage'=>$caseTaskData->caseOf->caseStage->name ?? '',
+            ];
+            $TaskProgress = TaskProgress::where('case_task_id',$caseTaskData->id)->orderBy('id','desc')->get();
+            if(! $caseTaskData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
+            return response()->json([
+                 'caseTask_data' =>$caseTask,
+                 'taskProgress_data' => TaskProgressResource::collection($TaskProgress),
+                 'status'=>200
+
+                 ]);
+            
+        // }catch (\Exception $e) {
+        //     return response()->json([
+        //         'error' =>'Somethink Went Wrong',
+        //          'status'=>500
+        //     ]);
+        // }
     } 
 
     public function progress_list(Request $request,$id)

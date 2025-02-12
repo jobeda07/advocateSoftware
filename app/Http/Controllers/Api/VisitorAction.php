@@ -16,15 +16,23 @@ use App\Http\Resources\VisitorResource;
 class VisitorAction extends Controller
 {  
 
-
-
-    public function index(){
+    public function index(Request $request){
         try {    
-            $visitor = Visitor::orderBy('id','desc')->get();
-            return response()->json([
-                'visitor' => VisitorResource::collection($visitor),
-                 'status'=>200
-            ]);
+            $search=$request->query('search');
+            $query=Visitor::orderBy('id','desc');
+            if($search){
+                $query->where(function ($q) use ($search){
+                    $q->where("name","like","%{$search}%")
+                     ->orWhere("phone","like","%{$search}%")
+                     ->orWhere("visitorId","like","%{$search}%");
+                });
+            }
+            $visitors = $query->paginate(1)->appends($request->query());
+            if($visitors->isEmpty()){
+                return response()->json(['data'=>[]],404);
+            }
+            return VisitorResource::collection($visitors);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'error' =>'data not found',

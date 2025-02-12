@@ -26,7 +26,8 @@ class EmployeeResource extends JsonResource
             'expertise_in' => $this->expertise_in,
             'address' => $this->address,
             'image' =>$this->image ? $this->image : '',
-            'role_name'=>$this->getRoleNames()->join(', ')
+            'role_id' => method_exists($this->resource, 'getRoleIds') ? $this->resource->getRoleIds()->join(', ') : '',
+            'role_name' => method_exists($this->resource, 'getRoleNames') ? $this->resource->getRoleNames()->join(', ') : '',
         ];
     }
 }
