@@ -17,11 +17,30 @@ use App\Http\Resources\ExpenseResource;
 class ExpenseAction extends Controller
 {  
     use ImageUpload;
-    public function index(){
+    public function index(Request $request){
         try {
 
-            $expense = Expense::orderBy('id','desc')->get();
-            return response()->json(['expense_data' => ExpenseResource::collection($expense) ,'status'=>200]);
+            $search=$request->query('search');
+            $query=Expense::orderBy('id', 'DESC');
+            if($search){
+               $query->where(function ($q) use ($search){
+                   $q->where("transaction_no","like","%{$search}%")
+                      ->orWhere("caseId","like","%{$search}%")
+                      ->orWhereHas('expense_category', function ($query) use ($search) {
+                        $query->where("name", "like", "%{$search}%");
+                    });
+               });
+            }
+           $expenses = $query->paginate(1)->appends($request->query());
+           if ($expenses->isEmpty()) {
+               return response()->json(['data' => []], 404);
+           }
+           return ExpenseResource::collection($expenses)
+               ->additional(['status' => 200]);
+
+
+            // $expense = Expense::orderBy('id','desc')->get();
+            // return response()->json(['expense_data' => ExpenseResource::collection($expense) ,'status'=>200]);
          
         } catch (\Exception $e) {
             return response()->json([

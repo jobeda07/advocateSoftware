@@ -17,14 +17,26 @@ use App\Http\Resources\EmployeeResource;
 class EmployeeAction extends Controller
 {  
     use ImageUpload;
-    public function index(){
+    public function index(Request $request){
         try {
-            $employeeData = User::where('id','!=',1)->orderBy('id','desc')->get();
+            $search=$request->query('search');
+            $query=User::where('id','!=',1)->orderBy('id', 'DESC');
 
-            return response()->json([
-                'employee' =>EmployeeResource::collection($employeeData),
-                 'status'=>200
-            ]);
+            if($search){
+                $query->where(function ($q) use ($search){
+                    $q->where("name","like","%{$search}%")
+                       ->orWhere("phone","like","%{$search}%")
+                       ->orWhere("email","like","%{$search}%")
+                       ->orWhere("expertise_in","like","%{$search}%");
+                });
+             }
+            $employeeData = $query->paginate(1)->appends($request->query());
+            if ($employeeData->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+            return EmployeeResource::collection($employeeData)
+                ->additional(['status' => 200]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' =>'data not found',
