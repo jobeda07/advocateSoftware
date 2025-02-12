@@ -14,11 +14,31 @@ use App\Http\Resources\CaseFeeResource;
 
 class CaseFeeAction extends Controller
 {  
-    public function index(){
+    public function index(Request $request){
         try {
-
-            $caseFee = CaseFee::orderBy('id','desc')->get();
-            return response()->json(['caseFee_data' => CaseFeeResource::collection($caseFee) ,'status'=>200]);
+            $search=$request->query('search');
+            $query = CaseFee::orderBy('id','DESC');
+            if($search){
+                $query->where(function ($q) use ($search){
+                    $q->where("caseId","like","%{$search}%")
+                      ->orWhere("transaction_no","like","%{$search}%")
+                      ->orWhereHas('caseOf', function ($caseQuery) use ($search) { 
+                        // Join the caseId table first
+                        $caseQuery->whereHas('clientAdd', function ($clientQuery) use ($search) {
+                            // Then filter by clientAdd details
+                            $clientQuery->where("name", "like", "%{$search}%")
+                                        ->orWhere("phone", "like", "%{$search}%")
+                                        ->orWhere("email", "like", "%{$search}%");
+                        });
+                    });
+                });
+            }
+            $caseFees = $query->paginate(1)->appends($request->query());
+            if ($caseFees->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+            return CaseFeeResource::collection($caseFees)
+                ->additional(['status' => 200]);
          
         } catch (\Exception $e) {
             return response()->json([
@@ -36,7 +56,7 @@ class CaseFeeAction extends Controller
             $timestamp = now()->format('Ymd');
 
             if ($lastFee) {
-                $lastFeeNumber = str_replace('CTR', '', $lastFee->id);
+                $lastFeeNumber = str_replace('CTR', '', $lastFee->transaction_no);
                 $newFeeNumber = $lastFeeNumber + 1;
                 $newFeeId = "CTR{$newFeeNumber}";
             }else {
