@@ -15,11 +15,31 @@ use App\Http\Resources\HearingResource;
 
 class HearingAction extends Controller
 {  
-    public function index(){
+    public function index(Request $request){
         try {
-
-            $hearing = Hearing::orderBy('id','desc')->get();
-            return response()->json(['hearing_data' => HearingResource::collection($hearing) ,'status'=>200]);
+             $search=$request->query('search');
+             $query=Hearing::orderBy('id', 'DESC');
+             if($search){
+                $query->where(function ($q) use ($search){
+                    $q->where("caseId","like","%{$search}%")
+                       ->orWhere("date_time","like","%{$search}%")
+                       ->orWhereHas('caseOf', function ($caseQuery) use ($search) { 
+                        // Join the caseId table first
+                        $caseQuery->whereHas('clientAdd', function ($clientQuery) use ($search) {
+                            // Then filter by clientAdd details
+                            $clientQuery->where("name", "like", "%{$search}%")
+                                        ->orWhere("phone", "like", "%{$search}%")
+                                        ->orWhere("email", "like", "%{$search}%");
+                        });
+                    });
+                });
+             }
+            $hearing = $query->paginate(1)->appends($request->query());
+            if ($hearing->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+            return HearingResource::collection($hearing)
+                ->additional(['status' => 200]);
          
         } catch (\Exception $e) {
             return response()->json([
