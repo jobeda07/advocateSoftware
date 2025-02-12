@@ -16,11 +16,24 @@ use App\Http\Resources\TaskProgressResource;
 
 class CaseTaskAction extends Controller
 {  
-    public function index(){
+    public function index(Request $request){
         try {
 
-            $caseTask = CaseTask::orderBy('id','desc')->get();
-            return response()->json(['caseTask_data' => CaseTaskResource::collection($caseTask) ,'status'=>200]);
+            $search=$request->query('search');
+            $query = CaseTask::orderBy('id','DESC');
+
+            if($search){
+                $query->where(function ($q) use ($search){
+                    $q->where("caseId","like","%{$search}%")
+                      ->orWhere("title","like","%{$search}%");
+                });
+            }
+            $caseTasks = $query->paginate(1)->appends($request->query());
+            if ($caseTasks->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+            return CaseTaskResource::collection($caseTasks)
+                ->additional(['status' => 200]);
          
         } catch (\Exception $e) {
             return response()->json([

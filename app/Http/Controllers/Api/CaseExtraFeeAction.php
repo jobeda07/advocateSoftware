@@ -14,11 +14,32 @@ use App\Http\Resources\CaseExtraFeeResource;
 
 class CaseExtraFeeAction extends Controller
 {  
-    public function index(){
-        try {
 
-            $caseExtraFee = CaseExtraFee::orderBy('id','desc')->get();
-            return response()->json(['caseExtraFee_data' => CaseExtraFeeResource::collection($caseExtraFee) ,'status'=>200]);
+    public function index(Request $request){
+        try {
+            $search=$request->query('search');
+            $query = CaseExtraFee::orderBy('id','DESC');
+            if($search){
+                $query->where(function ($q) use ($search){
+                    $q->where("caseId","like","%{$search}%")
+                      ->orWhere("transaction_no","like","%{$search}%")
+                      ->orWhereHas('caseOf', function ($caseQuery) use ($search) { 
+                        // Join the caseId table first
+                        $caseQuery->whereHas('clientAdd', function ($clientQuery) use ($search) {
+                            // Then filter by clientAdd details
+                            $clientQuery->where("name", "like", "%{$search}%")
+                                        ->orWhere("phone", "like", "%{$search}%")
+                                        ->orWhere("email", "like", "%{$search}%");
+                        });
+                    });
+                });
+            }
+            $caseExtraFees = $query->paginate(1)->appends($request->query());
+            if ($caseExtraFees->isEmpty()) {
+                return response()->json(['data' => []], 404);
+            }
+            return CaseExtraFeeResource::collection($caseExtraFees)
+                ->additional(['status' => 200]);
          
         } catch (\Exception $e) {
             return response()->json([
@@ -27,6 +48,7 @@ class CaseExtraFeeAction extends Controller
             ]);
         }
     } 
+
     public function store(CaseExtraFeeRequest $request)
     {   
 
@@ -34,16 +56,17 @@ class CaseExtraFeeAction extends Controller
         try {    
             $feeId = CaseExtraFee::orderBy('id', 'desc')->first();
             if ($feeId) {
-                $lastId = $feeId->id;
-                $id = str_pad($lastId + 1, 7, 0, STR_PAD_LEFT);
-                $feeId = "CETR{$id}";
+                $lastFeeNumber = str_replace('CETR', '', $feeId->transaction_no);
+                $newFeeNumber = $lastFeeNumber + 1;
+                $newFeeId = "CETR{$newFeeNumber}";
+
             } else {
                 $timestamp = now()->format('Ymd');
-                $feeId = "CETR{$timestamp}01";
+                $newFeeId = "CETR{$timestamp}01";
             } 
 
             $caseExtraFeeData = CaseExtraFee::create([
-                'transaction_no' => $feeId,
+                'transaction_no' => $newFeeId,
                 'caseId' => $request->caseId,
                 'amount' => $request->amount,
                 'payment_type' => $request->payment_type,
