@@ -42,7 +42,7 @@ class CaseHistoryAction extends Controller
     {   
 
         DB::beginTransaction();
-        // try {         
+        try {         
             $caseHistoryData = CaseHistory::create([
                 'caseId' => $request->caseId,
                 'hearing_date_time' => $request->hearing_date_time,
@@ -72,13 +72,13 @@ class CaseHistoryAction extends Controller
                 'message' => 'Data Created successfully'
             ]);
             
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' => 'Something went wrong',
-        //         'status' => 500
-        //     ]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' => 'Something went wrong',
+                'status' => 500
+            ]);
+        }
     }
     
     public function update(CaseHistoryRequest $request,$id){
@@ -141,6 +141,13 @@ class CaseHistoryAction extends Controller
                     'error' =>'data not found',
                      'status'=>500
                 ]);
+            }
+            if ($caseHistoryData->case_history_image) {
+                $this->deleteOne($caseHistoryData->case_history_image);
+            }
+            if ($caseHistoryData->case_history_pdf) {
+                $removefile = public_path($caseHistoryData->case_history_pdf);
+                File::delete($removefile);
             }
             $caseHistoryData->delete();
             DB::commit();
