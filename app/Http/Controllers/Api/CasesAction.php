@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Api;
 use DateTime;
 use Exception;
 use App\Models\User;
+use App\Models\CaseFee;
+use App\Models\Expense;
 use App\Models\Hearing;
 use App\Models\CourtCase;
+use App\Models\CaseHistory;
 use App\Models\CaseSection;
 use App\Traits\ImageUpload;
 use App\Models\CaseDocument;
+use App\Models\CaseExtraFee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +21,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\CourtCaseRequest;
+use App\Http\Resources\CaseFeeResource;
+use App\Http\Resources\ExpenseResource;
 use App\Http\Resources\CourtCaseResource;
+use App\Http\Resources\CaseHistoryResource;
+use App\Http\Resources\CaseExtraFeeResource;
 use App\Http\Resources\IndexCourtCaseResource;
 
 class CasesAction extends Controller
@@ -317,9 +325,17 @@ class CasesAction extends Controller
         try {
             $case = CourtCase::where('caseId',$caseId)->first();
             $caseData =new CourtCaseResource($case);
+            $caseHistory=CaseHistory::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
+            $caseFee = CaseFee::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
+            $caseExtraFee = CaseExtraFee::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
+            $expense = Expense::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
             
             return response()->json([
                  'case' =>$caseData,
+                 'caseHistory' => CaseHistoryResource::collection($caseHistory),
+                 'caseFee' => CaseFeeResource::collection($caseFee),
+                 'caseExtraFee' => CaseExtraFeeResource::collection($caseExtraFee),
+                 'expense' => ExpenseResource::collection($expense),
                  'status'=>200
             ]);
         } catch (\Exception $e) {
