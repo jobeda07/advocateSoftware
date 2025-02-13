@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\CaseSectionAction;
 use App\Http\Controllers\Api\TestimonialAction;
 use App\Http\Controllers\Api\CaseCategoryAction;
 use App\Http\Controllers\Api\CaseExtraFeeAction;
+use App\Http\Controllers\Api\DashboardAction;
 use App\Http\Controllers\Api\ExpenseCategoryAction;
 
 Route::get('/user', function (Request $request) {
@@ -49,6 +50,7 @@ Route::get('team-section/list', [EmployeeAction::class, 'teamlist']);
 
  // *****  admin    ********   //
 Route::middleware('auth:sanctum')->group(function (){
+    Route::get('/dashboard', [DashboardAction::class, 'dashboard'])->middleware('permission:dashboard-show');
     Route::prefix('court-list')->group(function () {
         Route::get('/', [CourtListAction::class, 'index'])->middleware('permission:visitor-list');
         Route::post('store', [CourtListAction::class, 'store'])->middleware('permission:visitor-list'); 

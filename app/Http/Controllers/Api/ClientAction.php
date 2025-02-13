@@ -188,6 +188,7 @@ class ClientAction extends Controller
                 ]);
             }
             $cases = CourtCase::where('clientId',$clientData->clientId)->orderBy('id','desc')->get();
+            $caseCount = CourtCase::where('clientId',$clientData->clientId)->count();
             $caseData = [];
             foreach ($cases as $case){
                 $caseSec=explode(',',$case->case_section);
@@ -209,6 +210,7 @@ class ClientAction extends Controller
             return response()->json([
                 'client' =>new ClientResource($clientData),
                 'case_Data' =>$caseData,
+                'caseCount' => $caseCount,
                  'status'=>200
             ]);
         }catch (\Exception $e) {

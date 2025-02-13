@@ -133,8 +133,14 @@ class CaseTaskAction extends Controller
         }
     }
     public function show($id){
-        // try{
+        try{
             $caseTaskData=CaseTask::find($id);
+            if(! $caseTaskData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
             $caseTask=[
             'caseId'=>$caseTaskData->caseId,
             'title'=>$caseTaskData->title,
@@ -159,12 +165,12 @@ class CaseTaskAction extends Controller
 
                  ]);
             
-        // }catch (\Exception $e) {
-        //     return response()->json([
-        //         'error' =>'Somethink Went Wrong',
-        //          'status'=>500
-        //     ]);
-        // }
+        }catch (\Exception $e) {
+            return response()->json([
+                'error' =>'Somethink Went Wrong',
+                 'status'=>500
+            ]);
+        }
     } 
 
     public function progress_list(Request $request,$id)
