@@ -179,7 +179,31 @@ class EmployeeAction extends Controller
                      'status'=>500
                 ]);
             }
-            $employeeData->portfolio_status=$employeeData->portfolio_status == 1 ? 0 : 1;;
+            $employeeData->portfolio_status=$employeeData->portfolio_status == 1 ? 0 : 1;
+            $employeeData->save();
+            DB::commit();
+            return response([
+                'message' => ' Status Change successfully'
+            ]);
+        }catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' =>'Somethink Went Wrong',
+                 'status'=>500
+            ]);
+        }
+    } 
+    public function status($id){
+        DB::beginTransaction();
+        try{
+            $employeeData=User::find($id);
+            if(! $employeeData){
+                return response()->json([
+                    'error' =>'data not found',
+                     'status'=>500
+                ]);
+            }
+            $employeeData->status=$employeeData->status == 1 ? 0 : 1;
             $employeeData->save();
             DB::commit();
             return response([

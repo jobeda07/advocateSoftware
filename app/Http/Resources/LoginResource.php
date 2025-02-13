@@ -23,6 +23,8 @@ class LoginResource extends JsonResource
             "phone" => $this->phone,
             "address" => $this->address,
             "Date" => date('d M Y',strtotime($this->created_at)),
+            'role_id' => method_exists($this->resource, 'getRoleIds') ? $this->resource->getRoleIds()->join(', ') : '',
+            'role_name' => method_exists($this->resource, 'getRoleNames') ? $this->resource->getRoleNames()->join(', ') : '',
         ];
     }
 }

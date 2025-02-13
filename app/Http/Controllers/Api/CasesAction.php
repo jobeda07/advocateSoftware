@@ -331,11 +331,12 @@ class CasesAction extends Controller
     }
 
     public function case_lawer_store(Request $request,$caseId){
-        DB::beginTransaction();
+        
         $request->validate([
             'case_lawer_id' => 'required|exists:users,id',
         ]);
         try{
+            DB::beginTransaction();
             $case=CourtCase::where('caseId',$caseId)->first();
             if(!$case){
                 return response([

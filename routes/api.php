@@ -1,32 +1,33 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthAction;
-use App\Http\Controllers\Api\CourtListAction;
-use App\Http\Controllers\Api\CaseCategoryAction;
-use App\Http\Controllers\Api\CaseSectionAction;
-use App\Http\Controllers\Api\CaseTypeAction;
-use App\Http\Controllers\Api\CaseStageAction;
-use App\Http\Controllers\Api\VisitorAction;
-use App\Http\Controllers\Api\ClientTypeAction;
-use App\Http\Controllers\Api\ClientAction;
-use App\Http\Controllers\Api\AddressAction;
-use App\Http\Controllers\Api\CasesAction;
-use App\Http\Controllers\Api\EmployeeAction;
-use App\Http\Controllers\Api\HearingAction;
-use App\Http\Controllers\Api\CaseFeeAction;
-use App\Http\Controllers\Api\CaseExtraFeeAction;
-use App\Http\Controllers\Api\ExpenseAction;
-use App\Http\Controllers\Api\ExpenseCategoryAction;
-use App\Http\Controllers\Api\CaseTaskAction;
 use App\Http\Controllers\Api\HomeAction;
 use App\Http\Controllers\Api\AboutAction;
-use App\Http\Controllers\Api\ServiceAction;
-use App\Http\Controllers\Api\TestimonialAction;
+use App\Http\Controllers\Api\CasesAction;
+use App\Http\Controllers\Api\ClientAction;
+use App\Http\Controllers\Api\AddressAction;
+use App\Http\Controllers\Api\CaseFeeAction;
 use App\Http\Controllers\Api\ContactAction;
-use App\Http\Controllers\Api\PermissionAction;
+use App\Http\Controllers\Api\ExpenseAction;
+use App\Http\Controllers\Api\HearingAction;
+use App\Http\Controllers\Api\ServiceAction;
+use App\Http\Controllers\Api\VisitorAction;
+use App\Http\Controllers\Api\CaseTaskAction;
+use App\Http\Controllers\Api\CaseTypeAction;
+use App\Http\Controllers\Api\EmployeeAction;
 use App\Http\Controllers\Api\ToDoListAction;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CaseStageAction;
+use App\Http\Controllers\Api\CourtListAction;
+use App\Http\Controllers\Api\ClientTypeAction;
+use App\Http\Controllers\Api\PermissionAction;
+use App\Http\Controllers\Api\CaseHistoryAction;
+use App\Http\Controllers\Api\CaseSectionAction;
+use App\Http\Controllers\Api\TestimonialAction;
+use App\Http\Controllers\Api\CaseCategoryAction;
+use App\Http\Controllers\Api\CaseExtraFeeAction;
+use App\Http\Controllers\Api\ExpenseCategoryAction;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -122,6 +123,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('update/{id}', [EmployeeAction::class, 'update'])->middleware('permission:employee-edit');
         Route::get('delete/{id}', [EmployeeAction::class, 'delete'])->middleware('permission:employee-delete');
         Route::get('portfolio/status/{id}', [EmployeeAction::class, 'portfolio_status'])->middleware('permission:employee-edit');
+        Route::get('status/{id}', [EmployeeAction::class, 'status'])->middleware('permission:employee-edit');
     }); 
 
     Route::prefix('hearing')->group(function () {
@@ -209,4 +211,12 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('update/{id}', [PermissionAction::class, 'update'])->middleware('permission:role.edit');
         Route::get('delete/{id}', [PermissionAction::class, 'delete'])->middleware('permission:role.delete');
     });
+
+    Route::prefix('case-history')->middleware('permission:case-show')->group(function () {
+        Route::get('/', [CaseHistoryAction::class, 'index']);
+        Route::post('store', [CaseHistoryAction::class, 'store']);
+        Route::post('update/{id}', [CaseHistoryAction::class, 'update']);
+        Route::get('delete/{id}', [CaseHistoryAction::class, 'delete']);
+    });
+
 });
