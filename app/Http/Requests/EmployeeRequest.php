@@ -23,7 +23,7 @@ class EmployeeRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:150',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11','unique:users,phone'],
+            'phone' =>['required', 'unique:users,phone'],
             'email'=>'nullable|email|unique:users,email',
             'join_date' => 'required',
             'designation' => 'required|string|max:150',

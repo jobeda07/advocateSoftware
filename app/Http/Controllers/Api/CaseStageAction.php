@@ -13,7 +13,7 @@ class CaseStageAction extends Controller
 {  
     public function index(){
         try {
-            $caseStage = CaseStage::orderBy('id','desc')->get();
+            $caseStage = CaseStage::orderBy('id','desc')->paginate(50);
             $caseStageData = [];
 
             foreach ($caseStage as $item) {

@@ -31,7 +31,7 @@ class ExpenseAction extends Controller
                     });
                });
             }
-           $expenses = $query->paginate(1)->appends($request->query());
+           $expenses = $query->paginate(50)->appends($request->query());
            if ($expenses->isEmpty()) {
                return response()->json(['data' => []], 404);
            }

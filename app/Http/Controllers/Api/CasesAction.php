@@ -51,7 +51,7 @@ class CasesAction extends Controller
                 });
             }
 
-            $cases = $query->paginate(1)->appends($request->query());
+            $cases = $query->paginate(50)->appends($request->query());
 
             if ($cases->isEmpty()) {
                 return response()->json(['data' => []], 404);
@@ -70,7 +70,7 @@ class CasesAction extends Controller
     
      public function all_list(){
        try {
-            $case = CourtCase::orderBy('id','desc')->get();
+            $case = CourtCase::orderBy('id','desc')->paginate(50);
             $caseData = [];
             foreach ($case as $item) {
                 $caseData[] = [
@@ -320,8 +320,8 @@ class CasesAction extends Controller
             ]);
         }
     }
-
-    public function show($caseId){
+    
+       public function show($caseId){
         try {
             $case = CourtCase::where('caseId',$caseId)->first();
             $caseData =new CourtCaseResource($case);
@@ -345,6 +345,7 @@ class CasesAction extends Controller
             ]);
         }
     }
+
 
     public function case_lawer_store(Request $request,$caseId){
         

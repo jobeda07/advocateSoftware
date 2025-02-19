@@ -34,7 +34,7 @@ class HearingAction extends Controller
                     });
                 });
              }
-            $hearing = $query->paginate(1)->appends($request->query());
+            $hearing = $query->paginate(50)->appends($request->query());
             if ($hearing->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }

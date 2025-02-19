@@ -27,7 +27,7 @@ class VisitorAction extends Controller
                      ->orWhere("visitorId","like","%{$search}%");
                 });
             }
-            $visitors = $query->paginate(1)->appends($request->query());
+            $visitors = $query->paginate(50)->appends($request->query());
             if($visitors->isEmpty()){
                 return response()->json(['data'=>[]],404);
             }

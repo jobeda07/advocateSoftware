@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\ClientResources;
+use App\Models\CaseExtraFee;
+use App\Models\CaseFee;
 use Exception;
 use App\Models\Client;
 use App\Models\CourtCase;
@@ -19,9 +22,9 @@ use App\Http\Resources\ClientResource;
 use App\Http\Resources\IndexClientResource;
 
 class ClientAction extends Controller
-{  
+{
     use ImageUpload;
-    
+
     public function index(Request $request)
     {
         try {
@@ -36,7 +39,7 @@ class ClientAction extends Controller
                 });
             }
 
-            $clients = $query->paginate(2)->appends($request->query());
+            $clients = $query->paginate(50)->appends($request->query());
 
             if ($clients->isEmpty()) {
                 return response()->json(['data' => []], 404);
@@ -53,7 +56,7 @@ class ClientAction extends Controller
         }
     }
 
-    
+
     public function store(ClientRequest $request){
         DB::beginTransaction();
         try{
@@ -94,7 +97,7 @@ class ClientAction extends Controller
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function update(ClientRequest $request,$id){
 
         DB::beginTransaction();
@@ -134,7 +137,7 @@ class ClientAction extends Controller
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
@@ -178,7 +181,63 @@ class ClientAction extends Controller
             ]);
         }
     }
-    public function show($id){
+
+    public function show($id)
+    {
+        try {
+            $clientData = Client::where('clientId', $id)->first();
+            if (!$clientData) {
+                return response()->json([
+                    'error' => 'data not found',
+                    'status' => 500
+                ]);
+            }
+
+            $cases = CourtCase::where('clientId', $clientData->clientId)->orderBy('id', 'desc')->get();
+            $totalTransaction = CaseFee::whereIn('caseId', function ($query) use ($clientData) {
+                $query->select('caseId')->from('court_cases')->where('clientId', $clientData->clientId);
+            })->sum('amount');
+
+            $caseCount = $cases->count();
+            $totalFees = $cases->sum('fees'); // Sum of all case fees
+            $dueFees = $totalFees - $totalTransaction;
+
+            $caseData = [];
+            foreach ($cases as $case) {
+                $caseSec = explode(',', $case->case_section);
+                $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+
+                $caseData[] = [
+                    'caseId' => $case->caseId,
+                    'case_section' => $caseSections->toArray(),
+                    'client_type' => $case->clientType->name ?? '',
+                    'case_type' => $case->caseType->name ?? '',
+                    'case_category' => $case->caseCategory->name ?? '',
+                    'case_stage' => $case->caseStage->name ?? '',
+                    'fees' => $case->fees ?? '',
+                    'create_date_time' => $case->created_at->format('j F Y  g.i A'),
+                ];
+            }
+
+            return response()->json([
+                'client' => new ClientResources($clientData, [
+                    'total_case' => $caseCount,
+                    'total_fees' => $totalFees,
+                    'due_fees' => $dueFees
+                ]),
+                'case_Data' => $caseData,
+                'status' => 200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something Went Wrong',
+                'status' => 500
+            ]);
+        }
+    }
+
+
+    public function show1($id){
        try{
             $clientData=Client::where('clientId',$id)->first();
             if(!$clientData){
@@ -188,11 +247,18 @@ class ClientAction extends Controller
                 ]);
             }
             $cases = CourtCase::where('clientId',$clientData->clientId)->orderBy('id','desc')->get();
-            $caseCount = CourtCase::where('clientId',$clientData->clientId)->count();
+           $totalTransaction = CaseFee::whereIn('caseId', function ($query) use ($clientData) {
+               $query->select('caseId')->from('court_cases')->where('clientId', $clientData->clientId);
+           })->sum('amount');
+
+
+
+           $caseCount = CourtCase::where('clientId',$clientData->clientId)->count();
             $caseData = [];
             foreach ($cases as $case){
                 $caseSec=explode(',',$case->case_section);
                 $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+                $due_fees = $case->fees - $totalTransaction;
                 $caseData[] = [
                    // 'id' => $case->id,
                     'caseId' => $case->caseId,
@@ -201,16 +267,18 @@ class ClientAction extends Controller
                     'case_type' => $case->caseType->name ?? '',
                     'case_category' => $case->caseCategory->name ?? '',
                     'case_stage' => $case->caseStage->name ?? '',
-                    'fees' => $case->fees ?? '',
+                    'total_case' => $caseCount ?? '',
+                    'total_fees' => $case->fees ?? '',
+                    'due_fess' =>$due_fees,
                     //'court' => $case->courtAdd->name ?? '',
                     'create_date_time' => $case->created_at->format('j F Y  g.i A'),
+
                 ];
             }
-           
+
             return response()->json([
                 'client' =>new ClientResource($clientData),
                 'case_Data' =>$caseData,
-                'caseCount' => $caseCount,
                  'status'=>200
             ]);
         }catch (\Exception $e) {

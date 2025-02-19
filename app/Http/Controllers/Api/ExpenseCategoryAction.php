@@ -14,7 +14,7 @@ class ExpenseCategoryAction extends Controller
 {  
     public function index(){
         try {
-            $expenseCategory = ExpenseCategory::orderBy('id','desc')->get();
+            $expenseCategory = ExpenseCategory::orderBy('id','desc')->paginate(50);
             $expenseCategoryData = [];
 
             foreach ($expenseCategory as $item) {

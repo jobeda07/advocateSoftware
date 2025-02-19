@@ -24,7 +24,7 @@ class CaseHistoryAction extends Controller
                     $q->Where("hearing_date_time","like","%{$search}%");
                 });
              }
-            $caseHistory = $query->paginate(100)->appends($request->query());
+            $caseHistory = $query->paginate(50)->appends($request->query());
             if ($caseHistory->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }

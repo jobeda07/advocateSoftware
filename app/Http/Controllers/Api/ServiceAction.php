@@ -16,7 +16,7 @@ class ServiceAction extends Controller
     public function index(){
         try {
 
-            $service = Service::orderBy('serial','asc')->get();
+            $service = Service::orderBy('serial','asc')->paginate(50);
             return response()->json(['service_data' => ServiceResource::collection($service) ,'status'=>200]);
 
         } catch (\Exception $e) {

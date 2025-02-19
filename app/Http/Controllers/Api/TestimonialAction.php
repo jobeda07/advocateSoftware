@@ -16,7 +16,7 @@ class TestimonialAction extends Controller
     public function index(){
         try {
 
-            $testimonial = Testimonial::orderBy('id','desc')->get();
+            $testimonial = Testimonial::orderBy('id','desc')->paginate(50);
             return response()->json(['testimonial_data' => TestimonialResource::collection($testimonial) ,'status'=>200]);
 
         } catch (\Exception $e) {

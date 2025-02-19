@@ -34,7 +34,7 @@ class CaseExtraFeeAction extends Controller
                     });
                 });
             }
-            $caseExtraFees = $query->paginate(1)->appends($request->query());
+            $caseExtraFees = $query->paginate(50)->appends($request->query());
             if ($caseExtraFees->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }

@@ -28,7 +28,7 @@ class CaseTaskAction extends Controller
                       ->orWhere("title","like","%{$search}%");
                 });
             }
-            $caseTasks = $query->paginate(1)->appends($request->query());
+            $caseTasks = $query->paginate(50)->appends($request->query());
             if ($caseTasks->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }
@@ -178,7 +178,7 @@ class CaseTaskAction extends Controller
 
         try {
 
-            $TaskProgress = TaskProgress::where('case_task_id',$id)->orderBy('id','desc')->get();
+            $TaskProgress = TaskProgress::where('case_task_id',$id)->orderBy('id','desc')->paginate(50);
             return response()->json(['caseTask_data' => TaskProgressResource::collection($TaskProgress) ,'status'=>200]);
          
         } catch (\Exception $e) {

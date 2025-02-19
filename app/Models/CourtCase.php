@@ -41,4 +41,8 @@ class CourtCase extends Model
     public function createdBy(){
         return $this->belongsTo(User::class,'created_by');
     }
+    
+     public function case_fee(){
+        return $this->hasMany(CaseFee::class,'caseId','caseId');
+    }
 }

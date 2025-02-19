@@ -16,7 +16,7 @@ class ToDoListAction extends Controller
     public function index(){
         try {
 
-            $todo_list = ToDoList::where('created_by', Auth::user()->id)->orderBy('id','desc')->get();
+            $todo_list = ToDoList::where('created_by', Auth::user()->id)->orderBy('id','desc')->paginate(50);
             return response()->json(['todo_list_data' => ToDoListResource::collection($todo_list) ,'status'=>200]);
 
         } catch (\Exception $e) {

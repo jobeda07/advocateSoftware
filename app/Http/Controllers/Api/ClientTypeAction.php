@@ -13,7 +13,7 @@ class ClientTypeAction extends Controller
 {  
     public function index(){
         try {
-            $clientType = ClientType::orderBy('id','desc')->get();
+            $clientType = ClientType::orderBy('id','desc')->paginate(50);
             $clientTypeData = [];
 
             foreach ($clientType as $item) {

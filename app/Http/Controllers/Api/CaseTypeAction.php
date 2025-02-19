@@ -23,7 +23,7 @@ class CaseTypeAction extends Controller
             //         'case_category'=>$item->case_category->name ?? ''
             //     ];
             // }
-            $caseType = CaseType::orderBy('id', 'desc')->get();
+            $caseType = CaseType::orderBy('id', 'desc')->paginate(50);
             $caseTypeData = [];
 
             $groupedByCategory = $caseType->groupBy(function ($item) {

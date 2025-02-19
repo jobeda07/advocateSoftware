@@ -33,7 +33,7 @@ class CaseFeeAction extends Controller
                     });
                 });
             }
-            $caseFees = $query->paginate(1)->appends($request->query());
+            $caseFees = $query->paginate(50)->appends($request->query());
             if ($caseFees->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }

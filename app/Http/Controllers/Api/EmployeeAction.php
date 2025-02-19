@@ -30,7 +30,7 @@ class EmployeeAction extends Controller
                        ->orWhere("expertise_in","like","%{$search}%");
                 });
              }
-            $employeeData = $query->paginate(1)->appends($request->query());
+            $employeeData = $query->paginate(50)->appends($request->query());
             if ($employeeData->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }
@@ -88,7 +88,7 @@ class EmployeeAction extends Controller
     public function update(Request $request,$id){
         $request->validate([
             'name' => 'required|string|max:150',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11',Rule::unique('users', 'phone')->ignore($id)],
+            'phone' =>['required',Rule::unique('users', 'phone')->ignore($id)],
             'email'=>'nullable|email|unique:users,email,'. $id,
             'join_date' => 'required',
             'designation' => 'required|string|max:150',
@@ -220,7 +220,7 @@ class EmployeeAction extends Controller
 
     public function teamlist(){
         try {
-            $employeeData = User::where('id','!=',1)->where('portfolio_status',1)->orderBy('id','desc')->get();
+            $employeeData = User::where('id','!=',1)->where('portfolio_status',1)->orderBy('id','desc')->paginate(50);
 
             return response()->json([
                 'employee' =>EmployeeResource::collection($employeeData),

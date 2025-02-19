@@ -28,10 +28,10 @@ class ClientRequest extends FormRequest
             'email'=>'nullable|email',
             'fathers_name' => 'required|string|max:150',
             'profession' => 'required|string|max:150',
-            'division_id' => 'required',
-            'district_id' => 'required',
-            'thana_id' => 'required',
-            'address' => 'required|string|max:180',
+            // 'division_id' => 'required',
+            // 'district_id' => 'required',
+            // 'thana_id' => 'required',
+            //'address' => 'required|string|max:180',
             'reference' => 'required|string|max:500',
         ];
     }

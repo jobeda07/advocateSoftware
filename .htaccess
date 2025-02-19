@@ -11,6 +11,21 @@
     #RewriteRule ^ index.php [L]
     RewriteRule ^(/)?$ public/index.php [L] 
 </IfModule>
+<IfModule mod_headers.c>
+        SetEnvIf Origin "^http://localhost:52030$" ORIGIN_ALLOWED=$0
+        SetEnvIf Origin "^http://localhost:57602$" ORIGIN_ALLOWED=$0
+        SetEnvIf Origin "^https://advocate-portfolio.classicitltd.com$" ORIGIN_ALLOWED=$0
+        SetEnvIf Origin "^https://admin-busbooking.classicitltd.com$" ORIGIN_ALLOWED=$0
+    
+        Header always set Access-Control-Allow-Origin "%{ORIGIN_ALLOWED}e" env=ORIGIN_ALLOWED
+        Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+        Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept"
+        Header always set Access-Control-Allow-Credentials "true"
+    </IfModule>
+    
+    # php -- BEGIN cPanel-generated handler, do not edit
+    # Set the “ea-php82” package as the default “PHP” programming language.
+    <IfModule mime_module>
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php82” package as the default “PHP” programming language.
 <IfModule mime_module>

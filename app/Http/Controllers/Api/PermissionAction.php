@@ -18,7 +18,7 @@ class PermissionAction extends Controller
     
     public function  index(){
         try{
-            $roles = Role::where('guard_name', 'web')->where('id', '!=', 1)->orderBy('id', 'desc')->get();
+            $roles = Role::where('guard_name', 'web')->where('id', '!=', 1)->orderBy('id', 'desc')->paginate(50);
             if(!isset($roles)){
                 return response()->json([
                     'status'=>500,
