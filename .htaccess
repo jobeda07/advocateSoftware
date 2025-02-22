@@ -22,10 +22,7 @@
         Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept"
         Header always set Access-Control-Allow-Credentials "true"
     </IfModule>
-    
-    # php -- BEGIN cPanel-generated handler, do not edit
-    # Set the “ea-php82” package as the default “PHP” programming language.
-    <IfModule mime_module>
+
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php82” package as the default “PHP” programming language.
 <IfModule mime_module>

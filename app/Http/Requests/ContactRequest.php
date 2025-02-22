@@ -26,7 +26,7 @@ class ContactRequest extends FormRequest
             'longitude' => 'required|string|max:150',
             'address' => 'required|string|max:150',
             'email' => 'required|email|string|max:50',
-            'phone' => 'required|numeric|digits:11',
+            'phone' => 'required|numeric',
             'facebook_link' => 'required|string|max:150',
             'location_details' => 'required|string',
             'image' => 'required|image|mimes:png,jpg|max:1000'

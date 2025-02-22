@@ -28,7 +28,7 @@ class AddressAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => $e ,
                  'status'=>500
             ]);
         }
@@ -52,7 +52,7 @@ class AddressAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => $e ,
                  'status'=>500
             ]);
         }
@@ -76,7 +76,7 @@ class AddressAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => $e ,
                  'status'=>500
             ]);
         }

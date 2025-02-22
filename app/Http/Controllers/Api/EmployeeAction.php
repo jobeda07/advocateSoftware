@@ -89,7 +89,7 @@ class EmployeeAction extends Controller
         $request->validate([
             'name' => 'required|string|max:150',
             'phone' =>['required',Rule::unique('users', 'phone')->ignore($id)],
-            'email'=>'nullable|email|unique:users,email,'. $id,
+            'email'=>'required|email|unique:users,email,'. $id,
             'join_date' => 'required',
             'designation' => 'required|string|max:150',
             'address' => 'required|string|max:180',

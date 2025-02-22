@@ -33,7 +33,7 @@ class CourtCaseRequest extends FormRequest
             'comments' => 'required',
             'branch' => 'nullable|max:100',
             'priority' => 'required|in:Low,Medium,High',
-            'opposition_phone' => ['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
+            'opposition_phone' => 'required',
             'opposition_name' => 'required|string|max:150',
             'case_doc_name' => 'nullable|array',
             'case_doc_name.*' => 'nullable|string',

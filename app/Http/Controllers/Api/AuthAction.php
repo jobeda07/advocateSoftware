@@ -21,7 +21,7 @@ class AuthAction extends Controller
     {
         $credentials = $request->only('password');
 
-        if (strlen($request->email_phone) == 11 && is_numeric($request->email_phone)) {
+        if (is_numeric($request->email_phone)) {
             $credentials['phone'] = $request->email_phone;
         } else {
             $credentials['email'] = $request->email_phone;

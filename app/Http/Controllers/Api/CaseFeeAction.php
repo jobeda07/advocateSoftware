@@ -42,7 +42,7 @@ class CaseFeeAction extends Controller
          
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => $e ,
                  'status'=>500
             ]);
         }
@@ -82,7 +82,7 @@ class CaseFeeAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => 'Something went wrong',
+                'error' => $e ,
                 'status' => 500
             ]);
         }
@@ -116,7 +116,7 @@ class CaseFeeAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => $e ,
                  'status'=>500
             ]);
         }
@@ -140,7 +140,7 @@ class CaseFeeAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink Went Wrong',
+                'error' => $e ,
                  'status'=>500
             ]);
         }

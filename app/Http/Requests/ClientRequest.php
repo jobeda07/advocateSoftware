@@ -23,8 +23,8 @@ class ClientRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:150',
-            'phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
-            'alternative_phone' =>['required', 'regex:/(\+){0,1}(88){0,1}01(3|4|5|6|7|8|9)(\d){8}/', 'digits:11'],
+            'phone' =>'required',
+            'alternative_phone' =>'required',
             'email'=>'nullable|email',
             'fathers_name' => 'required|string|max:150',
             'profession' => 'required|string|max:150',
