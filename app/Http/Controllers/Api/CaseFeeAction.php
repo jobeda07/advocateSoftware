@@ -79,7 +79,6 @@ class CaseFeeAction extends Controller
 
             $totalPaid =CaseFee::where('caseId', $request->caseId)->sum('amount');
             $caseId=CourtCase::where('caseId',$request->caseId)->first();
-            //dd($caseId);
 
             if(($totalPaid +$request->amount) > $caseId->fees ){
                 return response()->json([

@@ -107,7 +107,6 @@ class CasesAction extends Controller
 
         DB::beginTransaction();
         try {
-            // Create case data
             $witnesses=[];
             if($request->witnesses){
             $witnesses = array_map(function ($witness) {

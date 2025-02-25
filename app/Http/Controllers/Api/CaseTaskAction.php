@@ -33,7 +33,11 @@ class CaseTaskAction extends Controller
             }
             else {
                 if($user->can('caseTask-list')){
-                    $caseTasks = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                    //$caseTasks = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                    $caseTasks = $query->where(function ($q) use ($user) {
+                        $q->where('created_by', $user->id)
+                          ->orWhereRaw("FIND_IN_SET(?, assign_to)", [$user->id]);
+                    })->paginate(50)->appends($request->query());
                 }
                 else {
                     return response()->json([
