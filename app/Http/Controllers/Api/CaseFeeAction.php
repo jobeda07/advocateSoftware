@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\CaseFeeRequest;
 use App\Http\Resources\CaseFeeResource;
+use App\Models\CourtCase;
 
 class CaseFeeAction extends Controller
 {
@@ -74,6 +75,17 @@ class CaseFeeAction extends Controller
                 $newFeeId = "CTR{$newFeeNumber}";
             }else {
                 $newFeeId = "CTR{$timestamp}01";
+            }
+
+            $totalPaid =CaseFee::where('caseId', $request->caseId)->sum('amount');
+            $caseId=CourtCase::where('caseId',$request->caseId)->first();
+            //dd($caseId);
+
+            if(($totalPaid +$request->amount) > $caseId->fees ){
+                return response()->json([
+                    'error' => 'you give extra amount',
+                    'status' => 401
+                ]);
             }
 
             $caseFeeData = CaseFee::create([

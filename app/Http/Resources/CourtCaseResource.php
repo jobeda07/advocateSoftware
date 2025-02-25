@@ -28,14 +28,11 @@ class CourtCaseResource extends JsonResource
         $lawer = User::whereIn('id', $caselawers)->get();
         $hearing = Hearing::where('caseId', $this->caseId)->latest()->first();
 
-        $case_expense = Expense::where('caseId', $this->caseId)->sum('amount');
-
-        $total_paid = CaseFee::where('caseId', $this->caseId)->sum('amount') +
-            CaseExtraFee::where('caseId', $this->caseId)->sum('amount');
-
-        $due = $this->fees - CaseFee::where('caseId', $this->caseId)->sum('amount');
-
-        $current_profit = $total_paid - $case_expense;
+        $case_expense = Expense::where('caseId', $this->caseId)->sum('amount') ?? 0;
+        $total_paid = CaseFee::where('caseId', $this->caseId)->sum('amount') ?? 0;
+        $total_extra_paid = CaseExtraFee::where('caseId', $this->caseId)->sum('amount') ?? 0;
+        $due = $this->fees - $total_paid;
+        $current_profit = ($total_paid + $total_extra_paid) - ($case_expense + $due);
 
         return [
             'caseId' => $this->caseId,
@@ -81,6 +78,7 @@ class CourtCaseResource extends JsonResource
 
             'total_fees' => $this->fees ?? 0,
             'total_paid' => $total_paid,
+            'total_extra_paid' => $total_extra_paid,
             'due' => $due,
             'case_expense' => $case_expense,
             'current_profit' => $current_profit,

@@ -105,7 +105,6 @@ class CasesAction extends Controller
     public function store(CourtCaseRequest $request)
     {
 
-
         DB::beginTransaction();
         try {
             // Create case data
