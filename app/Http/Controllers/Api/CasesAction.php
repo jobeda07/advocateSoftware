@@ -56,7 +56,11 @@ class CasesAction extends Controller
                 $cases = $query->paginate(50)->appends($request->query());
             }
             elseif ($user->can('case-list')){
-                    $cases = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                    //$cases = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                    $cases = $query->where(function ($q) use ($user) {
+                        $q->where('created_by', $user->id)
+                          ->orWhereRaw("FIND_IN_SET(?, case_lawer_id)", [$user->id]);
+                    })->paginate(50)->appends($request->query());
                 }
             else {
                 $cases = $query->where('case_lawer_id', $user->id)->paginate(50)->appends($request->query());
