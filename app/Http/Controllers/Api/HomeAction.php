@@ -18,7 +18,6 @@ class HomeAction extends Controller
     public function show(){
          try{
              $homeData = Home::first();
-            // dd($homeData);
              if(!isset($homeData)){
                  return response()->json([
                      'status'=>500,
@@ -31,18 +30,16 @@ class HomeAction extends Controller
              ]);
          } catch (\Exception $e) {
              return response()->json([
-                 'error' =>'Something went wrong',
+                 'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
              ]);
          }
      }
 
     public function update(HomeRequest $request){
-       //dd('fg');
         DB::beginTransaction();
         try{
             $homeData = Home::first();
-           // dd($homeData);
             if(!isset($homeData)){
                 return response()->json([
                     'status'=>false,
@@ -69,7 +66,7 @@ class HomeAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }

@@ -14,7 +14,7 @@ class CaseTaskResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+      public function toArray(Request $request): array
     {
         $caselawers = explode(',', $this->assign_to);
         $lawer = User::whereIn('id', $caselawers)->get();

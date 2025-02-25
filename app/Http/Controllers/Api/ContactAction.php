@@ -29,7 +29,7 @@ class ContactAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -79,7 +79,7 @@ class ContactAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }

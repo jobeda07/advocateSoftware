@@ -15,7 +15,6 @@ class VisitorResource extends JsonResource
     public function toArray(Request $request): array
     {
         return[
-            //'id' => $this->id,
             'visitorId' => $this->visitorId,
             'name' => $this->name ?? '',
             'phone' => $this->phone ?? '',

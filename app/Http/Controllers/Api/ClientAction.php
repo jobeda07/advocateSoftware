@@ -28,6 +28,7 @@ class ClientAction extends Controller
     public function index(Request $request)
     {
         try {
+            $user = Auth::user();
             $search = $request->query('search');
             $query = Client::orderByDesc('id');
 
@@ -39,7 +40,23 @@ class ClientAction extends Controller
                 });
             }
 
-            $clients = $query->paginate(50)->appends($request->query());
+
+
+            if ($user->hasRole('superAdmin')){
+                $clients = $query->paginate(50)->appends($request->query());
+            }
+            else {
+                if($user->can('client-list')){
+                    $clients = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
+            }
+
 
             if ($clients->isEmpty()) {
                 return response()->json(['data' => []], 404);
@@ -50,7 +67,7 @@ class ClientAction extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Data not found',
+            'error' => 'Something went wrong: ' . $e->getMessage(),
                 'status' => 500
             ]);
         }
@@ -93,7 +110,7 @@ class ClientAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                 'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -133,7 +150,7 @@ class ClientAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                 'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -176,7 +193,7 @@ class ClientAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink Went Wrong',
+                 'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -209,7 +226,7 @@ class ClientAction extends Controller
 
                 $caseData[] = [
                     'caseId' => $case->caseId,
-                    'case_section' => $caseSections->toArray(),
+                    'case_section' => $case->case_section,
                     'client_type' => $case->clientType->name ?? '',
                     'case_type' => $case->caseType->name ?? '',
                     'case_category' => $case->caseCategory->name ?? '',
@@ -230,62 +247,10 @@ class ClientAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Something Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                 'status' => 500
             ]);
         }
     }
 
-
-    public function show1($id){
-       try{
-            $clientData=Client::where('clientId',$id)->first();
-            if(!$clientData){
-                return response()->json([
-                    'error' =>'data not found',
-                     'status'=>500
-                ]);
-            }
-            $cases = CourtCase::where('clientId',$clientData->clientId)->orderBy('id','desc')->get();
-           $totalTransaction = CaseFee::whereIn('caseId', function ($query) use ($clientData) {
-               $query->select('caseId')->from('court_cases')->where('clientId', $clientData->clientId);
-           })->sum('amount');
-
-
-
-           $caseCount = CourtCase::where('clientId',$clientData->clientId)->count();
-            $caseData = [];
-            foreach ($cases as $case){
-                $caseSec=explode(',',$case->case_section);
-                $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
-                $due_fees = $case->fees - $totalTransaction;
-                $caseData[] = [
-                   // 'id' => $case->id,
-                    'caseId' => $case->caseId,
-                    'case_section' => $caseSections->toArray(),
-                    'client_type' => $case->clientType->name ?? '',
-                    'case_type' => $case->caseType->name ?? '',
-                    'case_category' => $case->caseCategory->name ?? '',
-                    'case_stage' => $case->caseStage->name ?? '',
-                    'total_case' => $caseCount ?? '',
-                    'total_fees' => $case->fees ?? '',
-                    'due_fess' =>$due_fees,
-                    //'court' => $case->courtAdd->name ?? '',
-                    'create_date_time' => $case->created_at->format('j F Y  g.i A'),
-
-                ];
-            }
-
-            return response()->json([
-                'client' =>new ClientResource($clientData),
-                'case_Data' =>$caseData,
-                 'status'=>200
-            ]);
-        }catch (\Exception $e) {
-            return response()->json([
-                'error' =>'Somethink Went Wrong',
-                 'status'=>500
-            ]);
-        }
-    }
 }

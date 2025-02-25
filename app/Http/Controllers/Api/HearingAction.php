@@ -14,19 +14,18 @@ use App\Http\Requests\HearingRequest;
 use App\Http\Resources\HearingResource;
 
 class HearingAction extends Controller
-{  
+{
     public function index(Request $request){
         try {
+             $user = Auth::user();
              $search=$request->query('search');
              $query=Hearing::orderBy('id', 'DESC');
              if($search){
                 $query->where(function ($q) use ($search){
                     $q->where("caseId","like","%{$search}%")
                        ->orWhere("date_time","like","%{$search}%")
-                       ->orWhereHas('caseOf', function ($caseQuery) use ($search) { 
-                        // Join the caseId table first
+                       ->orWhereHas('caseOf', function ($caseQuery) use ($search) {
                         $caseQuery->whereHas('clientAdd', function ($clientQuery) use ($search) {
-                            // Then filter by clientAdd details
                             $clientQuery->where("name", "like", "%{$search}%")
                                         ->orWhere("phone", "like", "%{$search}%")
                                         ->orWhere("email", "like", "%{$search}%");
@@ -34,25 +33,40 @@ class HearingAction extends Controller
                     });
                 });
              }
-            $hearing = $query->paginate(50)->appends($request->query());
+
+            if ($user->hasRole('superAdmin')){
+                $hearing = $query->paginate(50)->appends($request->query());
+            }
+            else {
+                if($user->can('hearing-list')){
+                    $hearing = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
+            }
+
             if ($hearing->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }
             return HearingResource::collection($hearing)
                 ->additional(['status' => 200]);
-         
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                 'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function store(HearingRequest $request)
-    {   
+    {
 
         DB::beginTransaction();
-        try {         
+        try {
             $hearingData = Hearing::create([
                 'caseId' => $request->caseId,
                 'court_id' => $request->court_id,
@@ -61,29 +75,28 @@ class HearingAction extends Controller
                 'comment' => $request->comment,
                 'created_by' =>  Auth::user()->id,
             ]);
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new HearingResource($hearingData),
                 'message' => 'Data Created successfully'
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => 'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500
             ]);
         }
     }
-    
+
     public function update(HearingRequest $request,$id){
 
         DB::beginTransaction();
         try{
             $hearingData=Hearing::find($id);
-            //dd($hearingData);
             if(! $hearingData){
                 return response()->json([
                     'error' =>'data not found',
@@ -105,11 +118,11 @@ class HearingAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
@@ -129,9 +142,9 @@ class HearingAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 }

@@ -21,7 +21,7 @@ class ServiceAction extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -59,9 +59,8 @@ class ServiceAction extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('Service Store Error: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Something went wrong: ' . $e->getMessage(),
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500,
             ]);
         }
@@ -73,7 +72,6 @@ class ServiceAction extends Controller
         DB::beginTransaction();
         try{
             $serviceData = Service::find($id);
-            //dd($serviceData);
             if(!isset($serviceData)){
                 return response()->json([
                     'status'=>false,
@@ -110,7 +108,7 @@ class ServiceAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -140,7 +138,7 @@ class ServiceAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }

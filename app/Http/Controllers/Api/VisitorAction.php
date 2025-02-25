@@ -14,10 +14,11 @@ use App\Http\Resources\VisitorResource;
 
 
 class VisitorAction extends Controller
-{  
+{
 
     public function index(Request $request){
-        try {    
+        try {
+            $user = Auth::user();
             $search=$request->query('search');
             $query=Visitor::orderBy('id','desc');
             if($search){
@@ -27,15 +28,29 @@ class VisitorAction extends Controller
                      ->orWhere("visitorId","like","%{$search}%");
                 });
             }
-            $visitors = $query->paginate(50)->appends($request->query());
+
+            if ($user->hasRole('superAdmin')){
+                $visitors = $query->paginate(50)->appends($request->query());
+            }
+            else {
+                if($user->can('visitor-list')){
+                    $visitors = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
+            }
             if($visitors->isEmpty()){
                 return response()->json(['data'=>[]],404);
             }
             return VisitorResource::collection($visitors);
-            
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -53,7 +68,7 @@ class VisitorAction extends Controller
                 $newVisitorId = "VI{$newVisitorNumber}";
             }else {
                 $newVisitorId = "VI{$timestamp}01";
-            }   
+            }
             $visitorData=Visitor::create([
                 'visitorId'=>$newVisitorId,
                 'name'=>$request->name,
@@ -74,13 +89,13 @@ class VisitorAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function update(Request $request,$id){
-        
+
         DB::beginTransaction();
 
         try{
@@ -112,11 +127,11 @@ class VisitorAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
@@ -136,7 +151,7 @@ class VisitorAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }

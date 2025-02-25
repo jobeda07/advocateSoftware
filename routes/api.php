@@ -56,13 +56,18 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('get-profile', [AuthAction::class, 'getProfile'])->name('get_profile');
     Route::post('update-profile', [AuthAction::class, 'updateProfile'])->name('update_profile');
     Route::post('update-password', [AuthAction::class, 'updatePassword'])->name('update_password');
+    
+    
+    Route::get('get-site-settings', [AuthAction::class, 'getSetting'])->name('get-site-settings');
+    Route::post('site-settings', [AuthAction::class, 'getSettingUpdate'])->name('site-settings');
+    
 
     Route::get('/dashboard', [DashboardAction::class, 'dashboard'])->middleware('permission:dashboard-show');
     Route::prefix('court-list')->group(function () {
-        Route::get('/', [CourtListAction::class, 'index'])->middleware('permission:visitor-list');
-        Route::post('store', [CourtListAction::class, 'store'])->middleware('permission:visitor-list');
-        Route::post('update/{id}', [CourtListAction::class, 'update'])->middleware('permission:visitor-list');
-        Route::get('delete/{id}', [CourtListAction::class, 'delete'])->middleware('permission:visitor-list');
+        Route::get('/', [CourtListAction::class, 'index']);
+        Route::post('store', [CourtListAction::class, 'store'])->middleware('permission:courtList');
+        Route::post('update/{id}', [CourtListAction::class, 'update'])->middleware('permission:courtList');
+        Route::get('delete/{id}', [CourtListAction::class, 'delete'])->middleware('permission:courtList');
     });
     Route::prefix('case-category')->group(function () {
         Route::get('/', [CaseCategoryAction::class, 'index']);
@@ -127,7 +132,7 @@ Route::middleware('auth:sanctum')->group(function (){
         Route::post('lawer/store/{id}', [CasesAction::class, 'case_lawer_store'])->middleware('permission:case-edit');
     });
     Route::prefix('employee')->group(function () {
-        Route::get('/', [EmployeeAction::class, 'index'])->middleware('permission:employee-list');
+        Route::get('/', [EmployeeAction::class, 'index']);
         Route::post('store', [EmployeeAction::class, 'store'])->middleware('permission:employee-create');
         Route::post('update/{id}', [EmployeeAction::class, 'update'])->middleware('permission:employee-edit');
         Route::get('delete/{id}', [EmployeeAction::class, 'delete'])->middleware('permission:employee-delete');

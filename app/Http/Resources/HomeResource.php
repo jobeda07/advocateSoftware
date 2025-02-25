@@ -16,7 +16,6 @@ class HomeResource extends JsonResource
     {
 
         return [
-           // 'id' => $this->id,
             'name' => $this->name ?? '',
             'quote' => $this->quote ?? '',
             'details' => $this->details ?? '',

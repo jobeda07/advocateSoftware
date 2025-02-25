@@ -15,11 +15,11 @@ use App\Http\Requests\ExpenseRequest;
 use App\Http\Resources\ExpenseResource;
 
 class ExpenseAction extends Controller
-{  
+{
     use ImageUpload;
     public function index(Request $request){
         try {
-
+            $user = Auth::user();
             $search=$request->query('search');
             $query=Expense::orderBy('id', 'DESC');
             if($search){
@@ -31,29 +31,38 @@ class ExpenseAction extends Controller
                     });
                });
             }
-           $expenses = $query->paginate(50)->appends($request->query());
+            if ($user->hasRole('superAdmin')){
+                $expenses = $query->paginate(50)->appends($request->query());
+            }
+            else {
+                if($user->can('expense-list')){
+                    $expenses = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
+            }
            if ($expenses->isEmpty()) {
                return response()->json(['data' => []], 404);
            }
            return ExpenseResource::collection($expenses)
                ->additional(['status' => 200]);
 
-
-            // $expense = Expense::orderBy('id','desc')->get();
-            // return response()->json(['expense_data' => ExpenseResource::collection($expense) ,'status'=>200]);
-         
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function store(expenseRequest $request)
-    {   
+    {
 
         DB::beginTransaction();
-       // try {    
+        try {
             $lastExpense = Expense::orderBy('id', 'desc')->first();
             $timestamp = now()->format('Ymd');
             if ($lastExpense) {
@@ -62,7 +71,7 @@ class ExpenseAction extends Controller
                 $newtransaction_no = "EX{$newExpenseNumber}";
             }else {
                 $newtransaction_no = "EX{$timestamp}01";
-            } 
+            }
 
             $expenseData = Expense::create([
                 'transaction_no' => $newtransaction_no,
@@ -79,29 +88,28 @@ class ExpenseAction extends Controller
                 $expenseData->voucher_image = 'uploads/images/voucherImage/' . $filename;
                 $expenseData ->save();
             }
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new ExpenseResource($expenseData),
                 'message' => 'Data Created successfully'
             ]);
-            
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'error' => 'Something went wrong',
-        //         'status' => 500
-        //     ]);
-        // }
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error' => 'Something went wrong: ' . $e->getMessage(),
+                'status' => 500
+            ]);
+        }
     }
-    
+
     public function update(ExpenseRequest $request,$id){
 
         DB::beginTransaction();
         try{
             $expenseData=Expense::find($id);
-            //dd($expenseData);
             if(! $expenseData){
                 return response()->json([
                     'error' =>'data not found',
@@ -132,11 +140,11 @@ class ExpenseAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
@@ -148,10 +156,10 @@ class ExpenseAction extends Controller
                      'status'=>500
                 ]);
             }
-            
+
             $this->deleteOne($expenseData->voucher_image);
             $expenseData->delete();
-            
+
             DB::commit();
             return response([
                 'message' => ' Data Delete successfully'
@@ -159,10 +167,10 @@ class ExpenseAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
-    } 
+    }
 }
 

@@ -31,7 +31,7 @@ class AboutAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+               'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -67,7 +67,7 @@ class AboutAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+               'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }

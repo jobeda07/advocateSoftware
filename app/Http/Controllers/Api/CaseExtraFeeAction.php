@@ -13,20 +13,19 @@ use App\Http\Requests\CaseExtraFeeRequest;
 use App\Http\Resources\CaseExtraFeeResource;
 
 class CaseExtraFeeAction extends Controller
-{  
+{
 
     public function index(Request $request){
         try {
+            $user = Auth::user();
             $search=$request->query('search');
             $query = CaseExtraFee::orderBy('id','DESC');
             if($search){
                 $query->where(function ($q) use ($search){
                     $q->where("caseId","like","%{$search}%")
                       ->orWhere("transaction_no","like","%{$search}%")
-                      ->orWhereHas('caseOf', function ($caseQuery) use ($search) { 
-                        // Join the caseId table first
+                      ->orWhereHas('caseOf', function ($caseQuery) use ($search) {
                         $caseQuery->whereHas('clientAdd', function ($clientQuery) use ($search) {
-                            // Then filter by clientAdd details
                             $clientQuery->where("name", "like", "%{$search}%")
                                         ->orWhere("phone", "like", "%{$search}%")
                                         ->orWhere("email", "like", "%{$search}%");
@@ -34,26 +33,40 @@ class CaseExtraFeeAction extends Controller
                     });
                 });
             }
-            $caseExtraFees = $query->paginate(50)->appends($request->query());
+
+            if ($user->hasRole('superAdmin')){
+                $caseExtraFees = $query->paginate(50)->appends($request->query());
+            }
+            else {
+                if($user->can('extraCaseFee-list')){
+                    $caseExtraFees = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
+            }
             if ($caseExtraFees->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }
             return CaseExtraFeeResource::collection($caseExtraFees)
                 ->additional(['status' => 200]);
-         
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function store(CaseExtraFeeRequest $request)
-    {   
+    {
 
         DB::beginTransaction();
-        try {    
+        try {
             $feeId = CaseExtraFee::orderBy('id', 'desc')->first();
             if ($feeId) {
                 $lastFeeNumber = str_replace('CETR', '', $feeId->transaction_no);
@@ -63,7 +76,7 @@ class CaseExtraFeeAction extends Controller
             } else {
                 $timestamp = now()->format('Ymd');
                 $newFeeId = "CETR{$timestamp}01";
-            } 
+            }
 
             $caseExtraFeeData = CaseExtraFee::create([
                 'transaction_no' => $newFeeId,
@@ -73,23 +86,23 @@ class CaseExtraFeeAction extends Controller
                 'comment' => $request->comment,
                 'created_by' =>  Auth::user()->id,
             ]);
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new CaseExtraFeeResource($caseExtraFeeData),
                 'message' => 'Data Created successfully'
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500
             ]);
         }
     }
-    
+
     public function update(CaseExtraFeeRequest $request,$id){
 
         DB::beginTransaction();
@@ -118,11 +131,11 @@ class CaseExtraFeeAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
@@ -142,9 +155,9 @@ class CaseExtraFeeAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 }

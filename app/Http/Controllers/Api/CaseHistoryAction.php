@@ -33,7 +33,7 @@ class CaseHistoryAction extends Controller
          
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -75,7 +75,7 @@ class CaseHistoryAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                 'status' => 500
             ]);
         }
@@ -126,7 +126,7 @@ class CaseHistoryAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -157,7 +157,7 @@ class CaseHistoryAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }

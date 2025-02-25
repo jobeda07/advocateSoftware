@@ -21,7 +21,7 @@ class CaseHistoryResource extends JsonResource
             'activity' => $this->activity ?? '',
             'court_decition' => $this->court_decition ?? '',
             'remarks' => $this->remarks ?? '',
-            'createdBy' => $this->createdBy->name,
+            'createdBy' => $this->createdBy->name ?? '',
             'case_history_image' =>$this->case_history_image ?? '',
             'case_history_pdf' => $this->case_history_pdf ?? '',
             'create_date_time' => $this->created_at->format('j F Y  g.i A')

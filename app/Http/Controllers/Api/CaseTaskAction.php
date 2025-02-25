@@ -15,10 +15,10 @@ use App\Http\Resources\CaseTaskResource;
 use App\Http\Resources\TaskProgressResource;
 
 class CaseTaskAction extends Controller
-{  
+{
     public function index(Request $request){
         try {
-
+            $user = Auth::user();
             $search=$request->query('search');
             $query = CaseTask::orderBy('id','DESC');
 
@@ -28,26 +28,39 @@ class CaseTaskAction extends Controller
                       ->orWhere("title","like","%{$search}%");
                 });
             }
-            $caseTasks = $query->paginate(50)->appends($request->query());
+            if ($user->hasRole('superAdmin')){
+                $caseTasks = $query->paginate(50)->appends($request->query());
+            }
+            else {
+                if($user->can('caseTask-list')){
+                    $caseTasks = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
+            }
             if ($caseTasks->isEmpty()) {
                 return response()->json(['data' => []], 404);
             }
             return CaseTaskResource::collection($caseTasks)
                 ->additional(['status' => 200]);
-         
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function store(CaseTaskRequest $request)
-    {   
+    {
 
         DB::beginTransaction();
-        try {    
-        
+        try {
+
             $caseTaskData = CaseTask::create([
                 'caseId' => $request->caseId,
                 'date' => $request->date,
@@ -57,14 +70,14 @@ class CaseTaskAction extends Controller
                 'assign_to' => $request->assign_to,
                 'created_by' =>  Auth::user()->id,
             ]);
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new CaseTaskResource($caseTaskData),
                 'message' => 'Data Created successfully'
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
@@ -73,7 +86,7 @@ class CaseTaskAction extends Controller
             ]);
         }
     }
-    
+
     public function update(CaseTaskRequest $request,$id){
 
         DB::beginTransaction();
@@ -103,11 +116,11 @@ class CaseTaskAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($id){
         DB::beginTransaction();
@@ -127,7 +140,7 @@ class CaseTaskAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -164,36 +177,36 @@ class CaseTaskAction extends Controller
                  'status'=>200
 
                  ]);
-            
+
         }catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function progress_list(Request $request,$id)
-    {   
+    {
 
         try {
 
             $TaskProgress = TaskProgress::where('case_task_id',$id)->orderBy('id','desc')->paginate(50);
             return response()->json(['caseTask_data' => TaskProgressResource::collection($TaskProgress) ,'status'=>200]);
-         
+
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
     }
     public function progress_store(Request $request ,$id)
-    {  
+    {
         $request->validate([
             'progress' => 'required|max:100',
             'remarks' => 'required',
-        ]); 
+        ]);
         $caseTask = CaseTask::find($id);
         if(!$caseTask){
             return response()->json([
@@ -202,26 +215,26 @@ class CaseTaskAction extends Controller
             ]);
         }
         DB::beginTransaction();
-        try {    
-        
+        try {
+
             $TaskProgress = TaskProgress::create([
                 'case_task_id' => $caseTask->id,
                 'progress' => $request->progress,
                 'remarks' => $request->remarks,
                 'created_by' =>  Auth::user()->id,
             ]);
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new TaskProgressResource($TaskProgress),
                 'message' => 'Data Created successfully'
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500
             ]);
         }

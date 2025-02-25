@@ -13,16 +13,6 @@ class CaseTypeAction extends Controller
 {  
     public function index(){
         try {
-            // $caseType = CaseType::orderBy('id','desc')->get();
-            // $caseTypeData = [];
-
-            // foreach ($caseType as $item) {
-            //     $caseTypeData[] = [
-            //         'id' => $item->id,
-            //         'name' => $item->name,
-            //         'case_category'=>$item->case_category->name ?? ''
-            //     ];
-            // }
             $caseType = CaseType::orderBy('id', 'desc')->paginate(50);
             $caseTypeData = [];
 
@@ -49,7 +39,7 @@ class CaseTypeAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -74,7 +64,7 @@ class CaseTypeAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -105,7 +95,7 @@ class CaseTypeAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -129,7 +119,7 @@ class CaseTypeAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Somethink Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }

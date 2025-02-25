@@ -28,7 +28,7 @@ class CaseCategoryAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+               'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -51,7 +51,7 @@ class CaseCategoryAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+               'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -69,7 +69,7 @@ class CaseCategoryAction extends Controller
             ]);
             if(!$caseCategoryData){
                 return response()->json([
-                    'error' => $e ,
+                   'error' => 'Something went wrong: ' . $e->getMessage() ,
                      'status'=>500
                 ]);
             }
@@ -81,7 +81,7 @@ class CaseCategoryAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+               'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -101,7 +101,7 @@ class CaseCategoryAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+               'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }

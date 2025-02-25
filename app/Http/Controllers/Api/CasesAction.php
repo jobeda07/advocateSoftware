@@ -29,12 +29,13 @@ use App\Http\Resources\CaseExtraFeeResource;
 use App\Http\Resources\IndexCourtCaseResource;
 
 class CasesAction extends Controller
-{  
+{
     use ImageUpload;
-   
+
     public function index(Request $request)
     {
         try {
+            $user = Auth::user();
             $search = $request->query('search');
             $query = CourtCase::orderByDesc('id');
 
@@ -51,7 +52,18 @@ class CasesAction extends Controller
                 });
             }
 
-            $cases = $query->paginate(50)->appends($request->query());
+            if ($user->hasRole('superAdmin')){
+                $cases = $query->paginate(50)->appends($request->query());
+            }
+            elseif ($user->can('case-list')){
+                    $cases = $query->where('created_by', $user->id)->paginate(50)->appends($request->query());
+                }
+            else {
+                $cases = $query->where('case_lawer_id', $user->id)->paginate(50)->appends($request->query());
+            }
+
+
+
 
             if ($cases->isEmpty()) {
                 return response()->json(['data' => []], 404);
@@ -62,12 +74,12 @@ class CasesAction extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500
             ]);
         }
     }
-    
+
      public function all_list(){
        try {
             $case = CourtCase::orderBy('id','desc')->paginate(50);
@@ -85,15 +97,15 @@ class CasesAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function store(CourtCaseRequest $request)
     {
-       
-    
+
+
         DB::beginTransaction();
         try {
             // Create case data
@@ -113,7 +125,7 @@ class CasesAction extends Controller
                 $lastCaseNumber = str_replace('CA', '', $lastCase->caseId);
                 $newCaseNumber = $lastCaseNumber + 1;
                 $newCaseId = "CA{$newCaseNumber}";
-            } 
+            }
             else {
                 $newCaseId = "CA{$timestamp}01";
             }
@@ -137,51 +149,51 @@ class CasesAction extends Controller
                 'witnesses' => $witnesses,
                 'created_by'=>Auth::user()->id
             ]);
-    
+
             $createdDocuments = [];
-            
+
             if ($request->has('case_doc_name') && is_array($request->case_doc_name)) {
                 foreach ($request->case_doc_name as $index => $name) {
                     $data = [
                         'courtCase_id' => $caseData->id,
                         'name' => $name,
                     ];
-    
+
                     if (isset($request->case_image[$index])) {
                         $file = $request->case_image[$index];
                         $filename = $this->imageUpload($file, 1000, 1000, 'uploads/images/caseImage/', true);
                         $data['case_image'] = 'uploads/images/caseImage/' . $filename;
                     }
-    
+
                     if (isset($request->case_pdf[$index])) {
                         $file = $request->case_pdf[$index];
                         $pdfName = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('uploads/pdf/casePDF/'), $pdfName);
                         $data['case_pdf'] = 'uploads/pdf/casePDF/' . $pdfName;
                     }
-    
+
                     $createdDocuments[] = CaseDocument::create($data);
                 }
             }
-    
+
             DB::commit();
-            
+
             return response([
                 'case-data' => new CourtCaseResource($caseData),
                 'message' => 'Data Created successfully'
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500
             ]);
         }
     }
-    
+
     public function update(CourtCaseRequest $request,$caseId){
-        
+
         DB::beginTransaction();
         try{
             $caseData=CourtCase::where('caseId',$caseId)->first();
@@ -218,27 +230,27 @@ class CasesAction extends Controller
                 'opposition_name' => ucfirst($request->opposition_name),
             ]);
             $createdDocuments = [];
-            
+
             if ($request->has('case_doc_name') && is_array($request->case_doc_name)) {
                 foreach ($request->case_doc_name as $index => $name) {
                     $data = [
                         'courtCase_id' => $caseData->id,
                         'case_doc_name' => $name,
                     ];
-    
+
                     if (isset($request->case_image[$index])) {
                         $file = $request->case_image[$index];
                         $filename = $this->imageUpload($file, 1000, 1000, 'uploads/images/caseImage/', true);
                         $data['case_image'] = 'uploads/images/caseImage/' . $filename;
                     }
-    
+
                     if (isset($request->case_pdf[$index])) {
                         $file = $request->case_pdf[$index];
                         $pdfName = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('uploads/pdf/casePDF/'), $pdfName);
                         $data['case_pdf'] = 'uploads/pdf/casePDF/' . $pdfName;
                     }
-    
+
                     $createdDocuments[] = CaseDocument::create($data);
                 }
             }
@@ -250,11 +262,11 @@ class CasesAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
 
     public function delete($caseId){
         DB::beginTransaction();
@@ -289,11 +301,11 @@ class CasesAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
-    } 
+    }
     public function case_document_delete($id){
         DB::beginTransaction();
         try{
@@ -315,12 +327,12 @@ class CasesAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
     }
-    
+
        public function show($caseId){
         try {
             $case = CourtCase::where('caseId',$caseId)->first();
@@ -329,7 +341,7 @@ class CasesAction extends Controller
             $caseFee = CaseFee::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
             $caseExtraFee = CaseExtraFee::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
             $expense = Expense::where('caseId',$case->caseId)->orderBy('id', 'DESC')->get();
-            
+
             return response()->json([
                  'case' =>$caseData,
                  'caseHistory' => CaseHistoryResource::collection($caseHistory),
@@ -340,7 +352,7 @@ class CasesAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }
@@ -348,7 +360,7 @@ class CasesAction extends Controller
 
 
     public function case_lawer_store(Request $request,$caseId){
-        
+
         $request->validate([
             'case_lawer_id' => 'required|exists:users,id',
         ]);
@@ -358,7 +370,7 @@ class CasesAction extends Controller
             if(!$case){
                 return response([
                     'message' => 'Case Id Not found'
-                ]); 
+                ]);
             }
             $case->case_lawer_id=$request->case_lawer_id;
             $case->save();
@@ -369,7 +381,7 @@ class CasesAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                  'status'=>500
             ]);
         }

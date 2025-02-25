@@ -18,19 +18,19 @@ class IndexCourtCaseResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $caseSec=explode(',',$this->case_section);
+        $caseSec = explode(',', $this->case_section);
         $caseSections = CaseSection::whereIn('id', $caseSec)->pluck('section_code');
+
         $hearing=Hearing::where('caseId',$this->caseId)->latest()->first();
         $caselawers = explode(',', $this->case_lawer_id );
         $lawer = User::whereIn('id', $caselawers)->get();
         return [
-            //'id' => $this->id,
             'caseId' => $this->caseId,
             'clientId' => $this->clientId ?? '',
             'client_name' => $this->clientAdd->name ?? '',
             'client_phone' => $this->clientAdd->phone ?? '',
-            'case_section' => $caseSections->toArray(),
-            'case_category' => $this->caseCategory->name,
+            'case_section' => $this->case_section,
+            'case_category' => $this->caseCategory->name ?? '',
             'priority' => $this->priority,
             'case_type' => $this->caseType->name ?? '',
             'case_stage' => $this->caseStage->name ?? '',

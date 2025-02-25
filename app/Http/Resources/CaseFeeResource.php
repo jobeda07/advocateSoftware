@@ -23,7 +23,7 @@ class CaseFeeResource extends JsonResource
             'amount' => $this->amount ?? '',
             'payment_type' => $this->payment_type ?? '',
             'comment' => $this->comment ?? '',
-            'createdBy' => $this->createdBy->name,
+            'createdBy' => $this->createdBy->name ?? '',
             'create_date_time' => $this->created_at->format('j F Y  g.i A')
         ];
     }

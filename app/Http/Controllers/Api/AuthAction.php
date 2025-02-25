@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\SiteSetting;
 use App\Traits\ImageUpload;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -50,31 +51,6 @@ class AuthAction extends Controller
         return response()->json(['message' => 'Invalid token'], 401);
     }
 
-    // function profile_update(Request $request,$id)
-    // {
-    //     try {
-    //         $validatedData = $request->validated();
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         return $this->sendError('Validation Error.', $e->errors());
-    //     }
-    //     $user = Customer::find($id);
-
-
-    //     if (!$user) {
-    //         return $this->sendError('User not found.');
-    //     }
-    //     $user->update($validatedData);
-    //     if ($request->hasFile('image')) {
-    //         $filename = $this->uploadOne($request->image, 500, 500, config('imagepath.user'));
-    //         $this->deleteOne(config('imagepath.user'), $user->image);
-    //         $user->update(['image' => $filename]);
-    //     }
-    //     if ($request->filled('password')) {
-    //         $user->password = bcrypt($request->input('password'));
-    //         $user->save();
-    //     }
-    //     return $this->sendResponse($user, 'User updated successfully.');
-    // }
 
 
     public function getProfile()
@@ -93,7 +69,6 @@ class AuthAction extends Controller
             'status' => $user->status == 1 ? 'active' : 'inactive',
             'portfolio_status' => $user->portfolio_status == 1 ? 'active' : 'inactive',
 
-            // Convert collection to array before using implode
             'role_id' => is_object($user) && method_exists($user, 'getRoleIds')
                 ? implode(', ', $user->getRoleIds()->toArray())
                 : '',
@@ -143,7 +118,6 @@ class AuthAction extends Controller
             'address' => $request->address,
         ]);
 
-        // $user->syncRoles($request->roles);
 
 
 
@@ -222,6 +196,83 @@ class AuthAction extends Controller
                 'message' => 'Server Error: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+
+    public function getSetting()
+    {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+
+        $siteData = SiteSetting::first();
+        if(!isset($siteData)){
+            return response()->json([
+                'status'=>false,
+                'message' =>'Data not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'currency_symbol' => $siteData->currency_symbol,
+            'currency_code' => $siteData->currency_code,
+            'payment_method' => $siteData->payment_method,
+            'selected_language' =>$siteData->selected_language,
+            'site_logo' => $siteData->site_logo,
+            'fav_icon' => $siteData->fav_icon,
+            'created_at' => $siteData->created_at,
+            'updated_at' => $siteData->updated_at,
+        ]);
+    }
+
+
+
+    public function getSettingUpdate(Request $request)
+    {
+        $siteData = SiteSetting::first();
+
+        if (!$siteData) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        if (isset($request->site_logo)) {
+            $this->deleteOne($siteData->site_logo);
+            $file = $request->site_logo;
+            $filename = $this->imageUpload($file, 300, 300, 'uploads/images/site-setting/', true);
+            $image = 'uploads/images/site-setting/' . $filename;
+        }else{
+            $image= $siteData->site_logo ?? '';
+        }
+
+        if (isset($request->fav_icon)) {
+            $this->deleteOne($siteData->fav_icon);
+            $file = $request->fav_icon;
+            $filename = $this->imageUpload($file, 50, 50, 'uploads/images/site-setting/', true);
+            $image2 = 'uploads/images/site-setting/' . $filename;
+        }else{
+            $image2= $siteData->fav_icon ?? '';
+        }
+
+        $siteData->update([
+            'currency_symbol' => $request->currency_symbol,
+            'currency_code' => $request->currency_code,
+            'payment_method' => json_decode($request->input('payment_method'), true),
+            'selected_language' =>$request->selected_language,
+            'site_logo' => $image,
+            'fav_icon' => $image2,
+        ]);
+
+
+        return response()->json([
+            'currency_symbol' => $siteData->currency_symbol,
+            'currency_code' => $siteData->currency_code,
+            'payment_method' => $siteData->payment_method,
+            'selected_language' =>$siteData->selected_language,
+            'site_logo' => $siteData->site_logo,
+            'fav_icon' => $siteData->fav_icon,
+            'created_at' => $siteData->created_at,
+            'updated_at' => $siteData->updated_at,
+        ]);
     }
 
 

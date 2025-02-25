@@ -31,7 +31,7 @@ class PermissionAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -59,7 +59,7 @@ class PermissionAction extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -82,7 +82,7 @@ class PermissionAction extends Controller
         }catch(\Exception $e){
           DB::rollback();
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -108,21 +108,21 @@ class PermissionAction extends Controller
                 ], 404);
             }
 
-            $permissions = $role->permissions->groupBy('module_name'); // Group permissions by module_name
+            $permissions = $role->permissions->groupBy('module_name'); 
 
             return response()->json([
                 'role' =>new RoleResource($role),
                 'permissions-data' => $permissions->map(function ($group, $moduleName) {
                     return [
                         'module_name' => $moduleName,
-                        'permissions' => PermissionResource::collection($group), // Now works correctly
+                        'permissions' => PermissionResource::collection($group), 
                     ];
-                })->values(), // Ensure response is a clean array
+                })->values(), 
                 'status' => 200
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -168,7 +168,7 @@ class PermissionAction extends Controller
             }catch(\Exception $e){
                 DB::rollback();
                 return response()->json([
-                    'error' =>'Something went wrong',
+                    'error' => 'Something went wrong: ' . $e->getMessage() ,
                     'status'=>500
                 ]);
             }

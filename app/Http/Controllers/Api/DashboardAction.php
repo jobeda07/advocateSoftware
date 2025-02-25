@@ -15,98 +15,201 @@ use App\Models\User;
 use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardAction extends Controller
 {
     public function dashboard(Request $request){
         try {
-            $visitor_total = Visitor::count();
-            $visitor = Visitor::whereDate('created_at', today())->count();
+            $user = Auth::user();
+            if ($user->hasRole('superAdmin')){
+                $visitor_total = Visitor::count();
+                $visitor = Visitor::whereDate('created_at', today())->count();
 
-            $client_total = Client::count();
-            $client = Client::whereDate('created_at', today())->count();
+                $client_total = Client::count();
+                $client = Client::whereDate('created_at', today())->count();
 
-            $cases_total = CourtCase::count();
-            $cases_today = CourtCase::whereDate('created_at', today())->count();
+                $cases_total = CourtCase::count();
+                $cases_today = CourtCase::whereDate('created_at', today())->count();
 
-            $hearing = Hearing::whereDate('date_time', now()->toDateString())->count();
-            $hearingTomorrow = Hearing::whereDate('date_time', Carbon::tomorrow())->count();
+                $hearing = Hearing::whereDate('date_time', now()->toDateString())->count();
+                $hearingTomorrow = Hearing::whereDate('date_time', Carbon::tomorrow())->count();
 
-            $fee_received_todays = CaseFee::whereDate('created_at', today())->sum('amount');
-            $fee_received_months = CaseFee::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('amount');
+                $fee_received_todays = CaseFee::whereDate('created_at', today())->sum('amount');
+                $fee_received_months = CaseFee::whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->sum('amount');
 
-            $extra_fee_received_todays = CaseExtraFee::whereDate('created_at', today())->sum('amount');
-            $extra_fee_received_months = CaseExtraFee::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('amount');
+                $extra_fee_received_todays = CaseExtraFee::whereDate('created_at', today())->sum('amount');
+                $extra_fee_received_months = CaseExtraFee::whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->sum('amount');
 
-            $expense_todays = Expense::whereDate('created_at', today())->sum('amount');
-            $expense_months = Expense::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->sum('amount');
+                $expense_todays = Expense::whereDate('created_at', today())->sum('amount');
+                $expense_months = Expense::whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->sum('amount');
 
-            $employee_todays = User::whereDate('created_at', today())->count();
-            $employee_this_month = User::whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->count();
+                $employee_todays = User::whereDate('created_at', today())->count();
+                $employee_this_month = User::whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->count();
 
 
-            $search = $request->query('search');
-            $visitorQuery = Visitor::orderByDesc('id')->whereDate('created_at', today());
+                $search = $request->query('search');
+                $visitorQuery = Visitor::orderByDesc('id')->whereDate('created_at', today());
 
-            if ($search) {
-                $visitorQuery->where(function ($q) use ($search) {
-                    $q->where("name", "like", "%{$search}%")
-                        ->orWhere("phone", "like", "%{$search}%")
-                        ->orWhere("visitorId", "like", "%{$search}%");
-                });
+                if ($search) {
+                    $visitorQuery->where(function ($q) use ($search) {
+                        $q->where("name", "like", "%{$search}%")
+                            ->orWhere("phone", "like", "%{$search}%")
+                            ->orWhere("visitorId", "like", "%{$search}%");
+                    });
+                }
+
+                $visitors = $visitorQuery->paginate(50)->appends($request->query());
+
+
+                $caseQuery = CourtCase::orderByDesc('id')->whereDate('created_at', today());
+
+                if ($search) {
+                    $caseQuery->where(function ($q) use ($search) {
+                        $q->where("caseId", "like", "%{$search}%")
+                            ->orWhere("priority", "like", "%{$search}%")
+                            ->orWhere("clientId", "like", "%{$search}%")
+                            ->orWhereHas('clientAdd', function ($query) use ($search) {
+                                $query->where("name", "like", "%{$search}%")
+                                    ->orWhere("phone", "like", "%{$search}%")
+                                    ->orWhere("email", "like", "%{$search}%");
+                            });
+                    });
+                }
+
+                $cases = $caseQuery->paginate(50)->appends($request->query());
+
+                $month = $request->query('month', now()->month);
+                $year = $request->query('year', now()->year);
+
+                $start_date = Carbon::create($year, $month, 1);
+                $end_date = $start_date->copy()->endOfMonth();
+
+                $dates = [];
+                $dates1 = [];
+
+                while ($start_date <= $end_date) {
+                    $dates[$start_date->toDateString()] = Visitor::whereDate('created_at', $start_date)->count();
+                    $start_date->addDay();
+                }
+
+                $start_date = Carbon::create($year, $month, 1);
+
+                while ($start_date <= $end_date) {
+                    $dates1[$start_date->toDateString()] = CourtCase::whereDate('created_at', $start_date)->count();
+                    $start_date->addDay();
+                }
+
+                $graph_data_for_total_visitor = $dates;
+                $graph_data_for_total_cases = $dates1;
+
             }
+            else {
+                if($user->can('dashboard-show')){
+                    $visitor_total = Visitor::where('created_by', $user->id)->count();
+                    $visitor = Visitor::where('created_by', $user->id)->whereDate('created_at', today())->count();
 
-            $visitors = $visitorQuery->paginate(50)->appends($request->query());
+                    $client_total = Client::where('created_by', $user->id)->count();
+                    $client = Client::where('created_by', $user->id)->whereDate('created_at', today())->count();
+
+                    $cases_total = CourtCase::where('created_by', $user->id)->count();
+                    $cases_today = CourtCase::where('created_by', $user->id)->whereDate('created_at', today())->count();
+
+                    $hearing = Hearing::where('created_by', $user->id)->whereDate('date_time', now()->toDateString())->count();
+                    $hearingTomorrow = Hearing::where('created_by', $user->id)->whereDate('date_time', Carbon::tomorrow())->count();
+
+                    $fee_received_todays = CaseFee::where('created_by', $user->id)->whereDate('created_at', today())->sum('amount');
+                    $fee_received_months = CaseFee::where('created_by', $user->id)->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                        ->sum('amount');
+
+                    $extra_fee_received_todays = CaseExtraFee::where('created_by', $user->id)->whereDate('created_at', today())->sum('amount');
+                    $extra_fee_received_months = CaseExtraFee::where('created_by', $user->id)->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                        ->sum('amount');
+
+                    $expense_todays = Expense::where('created_by', $user->id)->whereDate('created_at', today())->sum('amount');
+                    $expense_months = Expense::where('created_by', $user->id)->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                        ->sum('amount');
+
+                    $employee_todays = User::whereDate('created_at', today())->count();
+                    $employee_this_month = User::whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year)
+                        ->count();
 
 
-            $caseQuery = CourtCase::orderByDesc('id')->whereDate('created_at', today());
+                    $search = $request->query('search');
+                    $visitorQuery = Visitor::orderByDesc('id')->whereDate('created_at', today());
 
-            if ($search) {
-                $caseQuery->where(function ($q) use ($search) {
-                    $q->where("caseId", "like", "%{$search}%")
-                        ->orWhere("priority", "like", "%{$search}%")
-                        ->orWhere("clientId", "like", "%{$search}%")
-                        ->orWhereHas('clientAdd', function ($query) use ($search) {
-                            $query->where("name", "like", "%{$search}%")
+                    if ($search) {
+                        $visitorQuery->where(function ($q) use ($search) {
+                            $q->where("name", "like", "%{$search}%")
                                 ->orWhere("phone", "like", "%{$search}%")
-                                ->orWhere("email", "like", "%{$search}%");
+                                ->orWhere("visitorId", "like", "%{$search}%");
                         });
-                });
+                    }
+
+                    $visitors = $visitorQuery->where('created_by', $user->id)->paginate(50)->appends($request->query());
+
+
+                    $caseQuery = CourtCase::orderByDesc('id')->whereDate('created_at', today());
+
+                    if ($search) {
+                        $caseQuery->where(function ($q) use ($search) {
+                            $q->where("caseId", "like", "%{$search}%")
+                                ->orWhere("priority", "like", "%{$search}%")
+                                ->orWhere("clientId", "like", "%{$search}%")
+                                ->orWhereHas('clientAdd', function ($query) use ($search) {
+                                    $query->where("name", "like", "%{$search}%")
+                                        ->orWhere("phone", "like", "%{$search}%")
+                                        ->orWhere("email", "like", "%{$search}%");
+                                });
+                        });
+                    }
+
+                    $cases = $caseQuery->where('created_by', $user->id)->paginate(50)->appends($request->query());
+
+                    $month = $request->query('month', now()->month);
+                    $year = $request->query('year', now()->year);
+
+                    $start_date = Carbon::create($year, $month, 1);
+                    $end_date = $start_date->copy()->endOfMonth();
+
+                    $dates = [];
+                    $dates1 = [];
+
+                    while ($start_date <= $end_date) {
+                        $dates[$start_date->toDateString()] = Visitor::where('created_by', $user->id)->whereDate('created_at', $start_date)->count();
+                        $start_date->addDay();
+                    }
+
+                    $start_date = Carbon::create($year, $month, 1);
+
+                    while ($start_date <= $end_date) {
+                        $dates1[$start_date->toDateString()] = CourtCase::where('created_by', $user->id)->whereDate('created_at', $start_date)->count();
+                        $start_date->addDay();
+                    }
+
+                    $graph_data_for_total_visitor = $dates;
+                    $graph_data_for_total_cases = $dates1;
+
+                }
+                else {
+                    return response()->json([
+                        'error' => 'You don’t have permission',
+                        'status' => 401
+                    ]);
+                }
             }
-
-            $cases = $caseQuery->paginate(50)->appends($request->query());
-
-            $month = $request->query('month', now()->month);
-            $year = $request->query('year', now()->year);
-
-            $start_date = Carbon::create($year, $month, 1);
-            $end_date = $start_date->copy()->endOfMonth();
-
-            $dates = [];
-            $dates1 = [];
-
-            while ($start_date <= $end_date) {
-                $dates[$start_date->toDateString()] = Visitor::whereDate('created_at', $start_date)->count();
-                $start_date->addDay();
-            }
-
-            $start_date = Carbon::create($year, $month, 1);
-
-            while ($start_date <= $end_date) {
-                $dates1[$start_date->toDateString()] = CourtCase::whereDate('created_at', $start_date)->count();
-                $start_date->addDay();
-            }
-
-            $graph_data_for_total_visitor = $dates;
-            $graph_data_for_total_cases = $dates1;
 
             return response()->json([
                 'visitor_total' => $visitor_total,
@@ -134,7 +237,7 @@ class DashboardAction extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Something Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                 'status' => 500
             ]);
         }

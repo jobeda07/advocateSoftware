@@ -15,7 +15,6 @@ class ClientResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-           // 'id' => $this->id,
             'clientId' => $this->clientId ?? '',
             'name' => $this->name ?? '',
             'phone' => $this->phone ?? '',

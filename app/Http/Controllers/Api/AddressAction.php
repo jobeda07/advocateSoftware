@@ -28,7 +28,7 @@ class AddressAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -52,7 +52,7 @@ class AddressAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }
@@ -76,7 +76,7 @@ class AddressAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e ,
+                'error' => 'Something went wrong: ' . $e->getMessage(),
                  'status'=>500
             ]);
         }

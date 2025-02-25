@@ -131,6 +131,7 @@ class RolePermissionSeeder extends Seeder
                     'expenseCategory',
                     'clientType',
                     'caseSection',
+                    'courtList',
                 ]
             ],
             [

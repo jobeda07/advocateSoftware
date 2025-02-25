@@ -21,7 +21,7 @@ class TestimonialAction extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -53,9 +53,8 @@ class TestimonialAction extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('Testimonial Store Error: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Something went wrong: ' . $e->getMessage(),
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500,
             ]);
         }
@@ -67,7 +66,6 @@ class TestimonialAction extends Controller
         DB::beginTransaction();
         try{
             $testimonialData = Testimonial::find($id);
-            //dd($serviceData);
             if(!isset($testimonialData)){
                 return response()->json([
                     'status'=>false,
@@ -96,7 +94,7 @@ class TestimonialAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -124,7 +122,7 @@ class TestimonialAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }

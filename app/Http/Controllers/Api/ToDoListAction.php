@@ -15,13 +15,11 @@ class ToDoListAction extends Controller
 {
     public function index(){
         try {
-
             $todo_list = ToDoList::where('created_by', Auth::user()->id)->orderBy('id','desc')->paginate(50);
             return response()->json(['todo_list_data' => ToDoListResource::collection($todo_list) ,'status'=>200]);
-
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -47,9 +45,8 @@ class ToDoListAction extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('ToDo List Store Error: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Something went wrong: ' . $e->getMessage(),
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status' => 500,
             ]);
         }
@@ -80,7 +77,7 @@ class ToDoListAction extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something went wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -107,7 +104,7 @@ class ToDoListAction extends Controller
         }catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'error' =>'Something Went Wrong',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
@@ -132,7 +129,7 @@ class ToDoListAction extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' =>'data not found',
+                'error' => 'Something went wrong: ' . $e->getMessage() ,
                 'status'=>500
             ]);
         }
